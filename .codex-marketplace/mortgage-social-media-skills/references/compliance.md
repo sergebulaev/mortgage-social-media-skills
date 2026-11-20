@@ -39,9 +39,23 @@ loan officer's social post is advertising.
 | Id | Level | Rule | Fails | Passes |
 |---|---|---|---|---|
 | REGZ-PAYMENT-TRIGGER | fix | A payment amount is a trigger term: the post must also state the down payment, the repayment terms and the APR (1026.24(d)) | "Own this home for $1,200/mo!" | "Ask me what your payment could look like; I'll run the real numbers with you." |
-| REGZ-DOWNPAYMENT-TRIGGER | fix | A down payment amount or percent, including 0% or "no money down", is a trigger term (1026.24(d)(1)(i)) | "Buy with 3% down!" | "Low down payment options exist. Let's see which fit you." |
-| REGZ-TERM-OFFER | fix | Offering a number of payments or a term ("get a 15-year loan", "360 payments") is a trigger term (1026.24(d)(1)(ii)) | "Lock a 15-year loan today" | "15-year vs 30-year: what changes besides the payment" (education, no offer) |
+| REGZ-TERM-OFFER | fix | A term or number of payments is a trigger term; the commentary's own example is "30-year mortgage" (1026.24(d)(1)(ii), comment 24(d)(1)-2) | "Ask me about a 30-year mortgage", "360 payments" | "15-year vs 30-year fixed: what changes besides the payment" (education, see the note below) |
+| REGZ-FINANCE-CHARGE | fix | The amount of a finance charge (points, a fee figure) is a trigger term (1026.24(d)(1)(iv)) | "Only 1 point!" | "Ask me how points work" |
 | REGZ-RATE-OFFER-APR | fix | A rate you offer must be stated as an APR (1026.24(c)) | "Rates as low as 6.25%!" | no own rate; or the full approved APR example |
+| REGZ-DOWNPAYMENT-TRIGGER | flag | A down payment percent or amount ("3% down"). House policy, see below | "Buy with 3% down!" | "Low down payment options exist. Let's see which fit you." |
+| REGZ-COUNSELOR | block | No "counselor" for a for-profit mortgage advertiser (1026.24(i)(6)) | "Talk to your mortgage counselor" | "Talk to your loan officer" |
+
+**Down payment, honestly.** The official commentary limits the down payment
+trigger to credit sales and says "no downpayment" is not a trigger term
+(comment 24(d)(1)-1). A mortgage is usually not a credit sale. Many lenders'
+compliance teams still treat "3% down" in a loan ad as a trigger, so the
+bundle FLAGS it for your decision instead of failing it, and does not flag
+"zero down" or "no money down".
+
+**Survey rates are the bundle's interpretation.** The Rate Desk treats the
+Freddie Mac PMMS average, labeled as an average and not an offer, as market
+news rather than an advertisement of your credit terms. That is this bundle's
+reading, not settled law: confirm it once with your compliance team.
 
 The writer's default fix is to **remove the trigger term**: the post becomes
 education and a call to talk. Adding the disclosure is the alternative only
@@ -55,7 +69,7 @@ approved figures). The skills never compute or invent an APR.
 
 | Id | Level | Rule |
 |---|---|---|
-| RATE-AVERAGE-LABEL | fix | A percent rate in the post (from Freddie Mac PMMS) carries the source and a line that it is a weekly national average and not a quote or an offer |
+| RATE-AVERAGE-LABEL | fix | A post that quotes a Freddie Mac / PMMS / survey rate carries a line that it is a weekly national average and not a quote or an offer. It is not applied to a post that states your own APR (the offer rules apply then) (12 CFR 1014.3(b)) |
 
 Reporting "the 30-year fixed averaged 7.28% this week (Freddie Mac PMMS)" is
 market news, not an offer of your loan; the label keeps it from being read as
@@ -68,7 +82,7 @@ figure, so the label can never satisfy the APR rule for an offer. Never round th
 
 | Id | Level | Rule |
 |---|---|---|
-| NMLS-ID | fix | Every post carries the loan officer's name and NMLS ID and the company's name and NMLS ID |
+| NMLS-ID | fix | Every post carries the loan officer's name and NMLS ID and the company's name and NMLS ID (the check needs both numbers) |
 | EQUAL-HOUSING | fix | Every post carries the Equal Housing statement the company uses |
 
 NMLS: state rules require the originator's unique identifier on advertising;
@@ -80,7 +94,8 @@ every post as the safe default. Line format, from the profile:
 
 Equal Housing: a legal requirement for some lenders (FDIC-supervised banks
 use "Equal Housing Lender", 12 CFR 338.3) and the policy of most others. As a
-federal rule for every non-bank originator it is **not verified**; the bundle
+federal rule for every non-bank originator it is **not verified** (federal
+credit unions: 12 CFR 701.31); the bundle
 adds it by default and the owner may remove it on their compliance team's
 written instruction.
 
@@ -91,10 +106,10 @@ bars misrepresenting the terms of mortgage credit.
 
 | Id | Level | Rule | Fails |
 |---|---|---|---|
-| MAP-GUARANTEE | block | No guaranteed approval, "everyone qualifies", "no credit check", "100% approval" | "We guarantee your approval!" |
-| MAP-GOVERNMENT | flag | No implied government affiliation or official program | "New government program pays your down payment" |
-| MAP-FORECAST | flag | No rate forecast stated as fact | "Rates will drop next month, buy now" |
-| MAP-FIXED | flag | "Fixed" next to an adjustable product needs the period | "5/6 ARM, fixed for life" |
+| MAP-GUARANTEE | block | No guaranteed approval or closing, "everyone qualifies", "no credit check", "100% approval" | "Pre-approved in 24 hours, guaranteed." |
+| MAP-GOVERNMENT | flag | No implied government affiliation or official program (1014.3(n); Reg Z 1026.24(i)(3)) | "The government wants you to own a home" |
+| MAP-FORECAST | flag | No rate forecast stated as fact (1014.3(b)) | "Rates will probably drop next month, buy now" |
+| MAP-FIXED | flag | "Fixed" for an adjustable product needs the period (1014.3(g); Reg Z 1026.24(i)(1)) | "5/6 ARM, fixed for life" |
 | SUPERLATIVE-UNPROVEN | flag | "Lowest rates in town", "#1 lender" need proof shown in the post | "Best rates in Austin" |
 
 FHA, VA and USDA loans are government-insured or guaranteed; saying so is
@@ -152,5 +167,8 @@ typical.
 ## What the check does not cover
 
 Company-specific rules (your compliance team's approved language), investor
-overlays, and state rules beyond the table. When `compliance_review: yes`,
+overlays, state rules beyond the table, reverse-mortgage advertising (HUD and
+state rules for HECM ads are not checked), HELOC/open-end credit ads (12 CFR
+1026.16), and whether your approved APR example matches the terms a post
+advertises (the check only sees that one is there). When `compliance_review: yes`,
 every draft says "awaiting compliance approval" in the read-back.

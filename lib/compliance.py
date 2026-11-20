@@ -176,15 +176,22 @@ def autofix(text: str, *, profile: Optional[dict] = None, rules: Optional[list] 
     writer makes, and the report says so."""
     profile = profile or {}
     rules = load_rules() if rules is None else rules
-    first = check(text, profile=profile, rules=rules, platform=platform, language=language)
     by_id = {r["id"]: r for r in rules}
     applied, out = [], text.rstrip()
-    for f in first.findings:
-        if f.level == "fix" and f.fixable:
-            addition, _ = _fill(by_id[f.rule_id]["append"], profile)
-            if addition and addition not in out:
-                out = f"{out}\n\n{addition}"
-                applied.append(f"{f.rule_id}: appended \"{addition}\"")
+    # Repeat until nothing changes: an appended line can itself trigger or
+    # satisfy another rule, and the final verdict must describe the final text.
+    for _ in range(4):
+        report = check(out, profile=profile, rules=rules, platform=platform, language=language)
+        changed = False
+        for f in report.findings:
+            if f.level == "fix" and f.fixable:
+                addition, _ = _fill(by_id[f.rule_id]["append"], profile)
+                if addition and addition not in out:
+                    out = f"{out}\n\n{addition}"
+                    applied.append(f"{f.rule_id}: appended \"{addition}\"")
+                    changed = True
+        if not changed:
+            break
     second = check(out, profile=profile, rules=rules, platform=platform, language=language)
     second.applied = applied
     return second

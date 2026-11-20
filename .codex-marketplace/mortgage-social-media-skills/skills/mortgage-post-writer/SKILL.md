@@ -98,10 +98,12 @@ End with: `learned: ...`.
 ## Reg Z and NMLS: what the check looks for here
 
 - **Reg Z trigger terms** (12 CFR 1026.24(d)): a payment amount ("$1,200/mo"),
-  a down payment amount or percent ("3% down", "$0 down"), a number of
-  payments or a term in an offer ("30 years at..."), or a finance charge. Any
-  one of them requires the down payment, the repayment terms and the APR in
-  the same post. The writer drops the trigger term (the usual fix) or adds the
+  a number of payments or a term ("30-year mortgage", "360 payments"), or a
+  finance charge amount ("1 point"). Any one of them requires the down
+  payment, the repayment terms and the APR in the same post. A down payment
+  percent ("3% down") is flagged as house policy; "zero down" is not a
+  trigger (comment 24(d)(1)-1). Never call yourself a "mortgage counselor"
+  (1026.24(i)(6)). The writer drops the trigger term (the usual fix) or adds the
   owner's approved `apr_disclosure`; never invents an APR.
 - **A rate in an offer** ("rates as low as", "our rate", "lock 6.5%") must be
   stated as an APR (1026.24(c)). Survey averages (Freddie Mac PMMS) are named

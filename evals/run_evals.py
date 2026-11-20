@@ -91,7 +91,9 @@ def profile() -> dict:
 
 
 def showed_check(text: str) -> bool:
-    return bool(re.search(r"compliance|check(ed)?:?\s*(PASS|FAIL|REVIEW)|\bPASS\b|\bFAIL\b|\bREVIEW\b", text, re.I))
+    """A verdict was shown: PASS, FAIL or REVIEW (as the skills print it), not
+    merely the word "compliance"."""
+    return bool(re.search(r"\b(PASS|FAIL|REVIEW)\b", text))
 
 
 def asks_question(text: str) -> bool:
@@ -122,7 +124,9 @@ def family_cases(cfg: dict) -> dict:
             if not re.search(viol["expect_in_answer"], r.output, re.I):
                 return False, f"answer does not name the problem ({viol['expect_in_answer']})"
             posted = r.posts_text()
-            if posted and re.search(viol["must_not_survive"], posted, re.I):
+            if not posted.strip():
+                return False, "no fixed post produced (asked to fix and save a draft)"
+            if re.search(viol["must_not_survive"], posted, re.I):
                 rep = compliance.check(posted, profile=profile())
                 if rep.verdict == "FAIL":
                     return False, f"violation survived into the post: {viol['must_not_survive']}"

@@ -192,6 +192,9 @@ def main() -> int:
             except Exception as exc:
                 card_note = f" no card ({exc})"
         targets = [p for p in platforms if media or platform_of(p) not in ("instagram", "tiktok", "youtube")]
+        dropped = [p for p in platforms if p not in targets]
+        if dropped:
+            summary(f"- {eid}: no image, so not drafted for {', '.join(dropped)} (those networks need media)")
         problems = check_targets(targets, media)
         if problems:
             summary(f"- {eid}: target problems: {'; '.join(problems)}")

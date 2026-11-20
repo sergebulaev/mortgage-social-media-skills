@@ -35,9 +35,26 @@ class RegZ(unittest.TestCase):
         rep = compliance.check(text, profile=PROFILE)
         self.assertNotIn("REGZ-PAYMENT-TRIGGER", ids(rep))
 
-    def test_zero_down_is_a_trigger(self):
-        for t in ("VA buyers: $0 down!", "Buy with 3% down this spring", "No money down options!"):
+    def test_percent_down_flagged_zero_down_not(self):
+        # Reg Z comment 24(d)(1)-1: "no downpayment" is not a trigger term.
+        for t in ("Buy with 3% down this spring", "3.5 percent down options"):
             self.assertIn("REGZ-DOWNPAYMENT-TRIGGER", ids(compliance.check(t, profile=PROFILE)), t)
+        for t in ("VA buyers: $0 down!", "No money down options!", "Zero down VA loans for veterans"):
+            self.assertNotIn("REGZ-DOWNPAYMENT-TRIGGER", ids(compliance.check(t, profile=PROFILE)), t)
+
+    def test_term_and_points_triggers(self):
+        for t in ("Ask me about a 30-year mortgage", "Pay off your mortgage in 15 years", "Only 1 point to the borrower"):
+            rep = compliance.autofix(t, profile=PROFILE)
+            self.assertEqual(rep.verdict, "FAIL", t)
+
+    def test_approved_apr_example_reaches_pass(self):
+        prof = dict(PROFILE, apr_disclosure=(
+            "Example: $400,000 purchase, 20% down payment, 30-year fixed, 360 payments, rate 6.875%, "
+            "APR 7.012% as of 11/19/2026. Your terms will vary. Not an offer of credit."))
+        for t in ("Payments of $2,661 a month on this example loan.", "Rates as low as 6.875%!"):
+            rep = compliance.autofix(t, profile=prof)
+            self.assertEqual(rep.verdict, "PASS", rep.summary())
+            self.assertNotIn("Freddie Mac PMMS weekly national averages", rep.text)
 
     def test_own_rate_offer_needs_apr(self):
         rep = compliance.check("Rates as low as 6.25% this week only!", profile=PROFILE)
@@ -81,6 +98,26 @@ class Claims(unittest.TestCase):
             rep = compliance.autofix(text, profile=PROFILE)
             self.assertIn(rid, ids(rep), text)
             self.assertIn(rep.verdict, ("REVIEW", "FAIL"))
+
+    def test_more_violations_caught(self):
+        cases = {"Perfect for first-time buyers and young families!": "FAIR-LENDING-WORDS",
+                 "Pre-approved in 24 hours, guaranteed.": "MAP-GUARANTEE",
+                 "We guarantee you'll close on time.": "MAP-GUARANTEE",
+                 "Rates will probably drop next month": "MAP-FORECAST",
+                 "Talk to your mortgage counselor today": "REGZ-COUNSELOR",
+                 "The government wants you to own a home": "MAP-GOVERNMENT"}
+        for text, rid in cases.items():
+            self.assertIn(rid, ids(compliance.check(text, profile=PROFILE)), text)
+
+    def test_no_false_positives(self):
+        for t in ("Lowest rates in months this week, per Freddie Mac.", "Fixed or adjustable? Here's how to choose.",
+                  "Home prices rose this year in Travis County."):
+            rep = compliance.check(t, profile=PROFILE)
+            self.assertFalse({"SUPERLATIVE-UNPROVEN", "MAP-FIXED", "RATE-AVERAGE-LABEL"} & ids(rep), t)
+
+    def test_both_nmls_ids_required(self):
+        rep = compliance.check("Questions? Message me. Dana Whitfield NMLS #1999001", profile=PROFILE)
+        self.assertIn("NMLS-ID", ids(rep))
 
     def test_plain_education_passes(self):
         rep = compliance.autofix("Pre-approval isn't a promise. It's a plan. Here's what we look at: income, "
