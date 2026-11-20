@@ -1,0 +1,55 @@
+name: Autopilot
+
+# Watches the Freddie Mac weekly mortgage rate survey (PMMS) and leaves DRAFTS in Publora. Never publishes.
+# Setup: references/autopilot.md. Disabled until autopilot/config.json exists.
+
+on:
+  schedule:
+    - cron: "30 17 * * 4,5"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (print, create nothing)"
+        type: boolean
+        default: true
+      no_llm:
+        description: "Write from templates, no model call"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: autopilot
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    if: ${{ hashFiles('autopilot/config.json') != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Watch the source and draft
+        env:
+          PUBLORA_API_KEY: ${{ secrets.PUBLORA_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          PIXFARO_KEY: ${{ secrets.PIXFARO_KEY }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          NO_LLM: ${{ inputs.no_llm }}
+        run: |
+          args=""
+          [ "$DRY_RUN" = "true" ] && args="$args --dry-run"
+          [ "$NO_LLM" = "true" ] && args="$args --no-llm"
+          python3 autopilot/watch.py $args
+      - name: Remember what was drafted (dedup across runs)
+        if: ${{ inputs.dry_run != true }}
+        run: |
+          if [ -n "$(git status --porcelain autopilot/state.json)" ]; then
+            git config user.name "autopilot"
+            git config user.email "autopilot@users.noreply.github.com"
+            git add autopilot/state.json
+            git commit -m "autopilot: state"
+            git push
+          fi

@@ -1,0 +1,9 @@
+# Not needed at runtime by Codex
+testing/
+evals/
+tests/fixtures/
+.env
+*.pyc
+__pycache__/
+.git/
+autopilot/state.json

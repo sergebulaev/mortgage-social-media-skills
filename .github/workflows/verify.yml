@@ -1,0 +1,25 @@
+name: Verify bundle
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+    paths-ignore: ["autopilot/state.json"]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: No credentials or memory tracked
+        run: python3 scripts/check_no_secrets.py
+      - name: SKILL.md frontmatter parses
+        run: python3 -m pip install --quiet pyyaml && python3 scripts/check_frontmatter.py
+      - name: Relative Markdown references resolve
+        run: python3 scripts/check_markdown_references.py
+      - name: Offline tests (core contract, compliance graders, parsers, autopilot)
+        run: python3 -m unittest discover -s tests -v

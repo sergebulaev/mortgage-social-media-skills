@@ -1,0 +1,2 @@
+# Runtime: Python standard library only (3.10+).
+# CI also installs pyyaml for scripts/check_frontmatter.py.

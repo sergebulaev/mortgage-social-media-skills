@@ -1,0 +1,12 @@
+.env
+testing/
+__pycache__/
+*.pyc
+.venv/
+venv/
+.DS_Store
+marketing/
+.playwright-mcp/
+memory/
+*-memory/
+!tests/fixtures/memory/

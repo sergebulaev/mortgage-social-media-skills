@@ -1,0 +1,5 @@
+{
+  "rate_week": {
+    "en": "Freddie Mac's weekly survey is out. The average {term_30} fixed rate is {rate_30}% for the week of {week_label}, {direction_30} {prev_rate_30}% the week before. The {term_15} fixed averaged {rate_15}%.\n\nA year ago, the week of {year_ago_label}, the {term_30} average was {year_ago_rate_30}%.\n\nYour own rate depends on your credit, your down payment, the loan and the day you lock. If you want to see what this week means for your numbers, message me and I'll run them with you.\n\nSource: {source_url}"
+  }
+}

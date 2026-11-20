@@ -1,0 +1,22 @@
+{
+  "slug": "mortgage",
+  "slug_prefix": "mortgage",
+  "repo": "mortgage-social-media-skills",
+  "display_name": "Mortgage Social Media Skills",
+  "memory_dir_name": "mortgage-memory",
+  "memory_env": "MORTGAGE_MEMORY_DIR",
+  "skills": {
+    "planner": "mortgage-content-planner",
+    "writer": "mortgage-post-writer",
+    "signature": "mortgage-rate-desk"
+  },
+  "languages": [
+    "en"
+  ],
+  "domains": [
+    "money_law"
+  ],
+  "feeds": [
+    "pmms"
+  ]
+}

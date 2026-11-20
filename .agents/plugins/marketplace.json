@@ -1,0 +1,20 @@
+{
+  "name": "mortgage-social-media-skills",
+  "interface": {
+    "displayName": "Mortgage Social Media Skills"
+  },
+  "plugins": [
+    {
+      "name": "mortgage-social-media-skills",
+      "source": {
+        "source": "local",
+        "path": "./.codex-marketplace/mortgage-social-media-skills"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

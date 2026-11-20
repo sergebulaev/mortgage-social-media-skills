@@ -1,0 +1,18 @@
+{
+  "test_today": "2026-11-19",
+  "repo": "mortgage-social-media-skills",
+  "language": "en",
+  "mode": "no-llm",
+  "max_drafts_per_day": 2,
+  "cards": false,
+  "platforms": ["facebook-90000000001", "linkedin-90000000003", "instagram-90000000002"],
+  "profile": {
+    "business_name": "Lone Star Hearth Lending",
+    "owner_name": "Dana Whitfield",
+    "nmls_id": "1999001",
+    "company_name": "Lone Star Hearth Lending LLC",
+    "company_nmls_id": "1999000",
+    "eho_statement": "Equal Housing Opportunity",
+    "state": "TX"
+  }
+}

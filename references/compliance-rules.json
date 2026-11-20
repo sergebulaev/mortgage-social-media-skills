@@ -1,0 +1,212 @@
+{
+  "checked": "2026-11-19",
+  "note": "Machine half of references/compliance.md (same ids). Regexes are case-insensitive and run on NFKC-normalized text.",
+  "rules": [
+    {
+      "id": "REGZ-PAYMENT-TRIGGER",
+      "level": "fix",
+      "title": "Payment amount is a Reg Z trigger term",
+      "if_any": [
+        "\\$\\s?[\\d,]+(\\.\\d+)?\\s*(/|per|a|each)\\s*(mo|month)\\b",
+        "\\bmonthly payments?\\b[^.\\n]{0,40}\\$\\s?[\\d,]+",
+        "\\bpayments? (of|as low as|from|under|starting at)\\s*\\$\\s?[\\d,]+"
+      ],
+      "unless_all": [
+        "\\bAPR\\b[^.\\n]{0,12}\\d+(\\.\\d+)?\\s?%|\\d+(\\.\\d+)?\\s?%\\s*APR\\b",
+        "\\bdown payment\\b|\\bdown\\b",
+        "\\b(term|years?|payments? of)\\b"
+      ],
+      "append": "{apr_disclosure}",
+      "message": "Stating a payment amount requires the down payment, the repayment terms and the APR in the same post. Usual fix: drop the payment amount. Otherwise add your compliance-approved APR example (apr_disclosure).",
+      "source": "Regulation Z, 12 CFR 1026.24(d)(1)-(2)",
+      "checked": "2026-11-19"
+    },
+    {
+      "id": "REGZ-DOWNPAYMENT-TRIGGER",
+      "level": "fix",
+      "title": "Down payment amount or percent is a Reg Z trigger term",
+      "if_any": [
+        "\\b\\d+(\\.\\d+)?\\s?%\\s*down\\b",
+        "\\$\\s?[\\d,]+\\s*down\\b",
+        "\\b(zero|no money|nothing|\\$0)\\s*down\\b",
+        "\\bdown payments? (of|as low as|from|starting at)\\s*(\\$\\s?[\\d,]+|\\d+(\\.\\d+)?\\s?%)"
+      ],
+      "unless_all": [
+        "\\bAPR\\b[^.\\n]{0,12}\\d+(\\.\\d+)?\\s?%|\\d+(\\.\\d+)?\\s?%\\s*APR\\b",
+        "\\b(term|years?|payments? of)\\b"
+      ],
+      "append": "{apr_disclosure}",
+      "message": "A down payment amount or percentage (including 0% or no money down) requires the repayment terms and the APR in the same post. Usual fix: say 'low down payment options' with no number, or add the approved APR example.",
+      "source": "Regulation Z, 12 CFR 1026.24(d)(1)(i)",
+      "checked": "2026-11-19"
+    },
+    {
+      "id": "REGZ-TERM-OFFER",
+      "level": "fix",
+      "title": "Number of payments or loan term offered with credit",
+      "if_any": [
+        "\\b(get|offer|offering|lock|qualify for|available|apply for|we have|you can get)\\b[^.\\n]{0,40}\\b\\d{2}[- ]year (loan|mortgage|fixed|term)",
+        "\\b\\d{3} (monthly )?payments\\b",
+        "\\bpay (it )?off in \\d+ years\\b"
+      ],
+      "unless_all": [
+        "\\bAPR\\b[^.\\n]{0,12}\\d+(\\.\\d+)?\\s?%|\\d+(\\.\\d+)?\\s?%\\s*APR\\b",
+        "\\bdown payment\\b|\\bdown\\b"
+      ],
+      "append": "{apr_disclosure}",
+      "message": "Offering a specific term or number of payments is a trigger term. Reporting a survey average for the 30-year fixed is market news; offering one is advertising credit.",
+      "source": "Regulation Z, 12 CFR 1026.24(d)(1)(ii)",
+      "checked": "2026-11-19"
+    },
+    {
+      "id": "REGZ-RATE-OFFER-APR",
+      "level": "fix",
+      "title": "A rate offered by you must be stated as an APR",
+      "if_any": [
+        "\\b(as low as|starting at|rates? from|our rates?|my rates?|we can (get|offer)|lock (in )?(at|your rate at)?|get you)\\b[^.\\n]{0,30}\\d+(\\.\\d+)?\\s?%",
+        "\\d+(\\.\\d+)?\\s?%[^.\\n]{0,30}\\b(rate )?(available|offer|special|today only|locks?)\\b"
+      ],
+      "unless_any": [
+        "\\bAPR\\b[^.\\n]{0,12}\\d+(\\.\\d+)?\\s?%|\\d+(\\.\\d+)?\\s?%\\s*APR\\b"
+      ],
+      "append": "{apr_disclosure}",
+      "message": "If the post states a rate you offer, it must state it as an annual percentage rate (APR), with the other terms the trigger rules require. Without an approved example, do not state your own rate: point to a quote instead.",
+      "source": "Regulation Z, 12 CFR 1026.24(c)",
+      "checked": "2026-11-19"
+    },
+    {
+      "id": "RATE-AVERAGE-LABEL",
+      "level": "fix",
+      "title": "A survey rate needs its source and a not-an-offer line",
+      "if_any": [
+        "\\d+\\.\\d+\\s?%"
+      ],
+      "unless_any": [
+        "not (a|an) (rate quote|quote|offer|loan offer|commitment)",
+        "\\bno es una oferta\\b"
+      ],
+      "append": "Rates shown are Freddie Mac PMMS weekly national averages, not a quote or an offer of credit. Your own rate depends on your situation.",
+      "message": "Market rates quoted from a survey are averages, not what you offer. Name the source and say it is not an offer, so the post cannot be read as a rate advertisement.",
+      "source": "Regulation Z, 12 CFR 1026.24(c); Reg N (MAP Rule), 12 CFR 1014.3(e)",
+      "checked": "2026-11-19"
+    },
+    {
+      "id": "NMLS-ID",
+      "level": "fix",
+      "title": "Loan officer and company NMLS ID",
+      "unless_any": [
+        "NMLS\\s*#?\\s*(ID\\s*)?#?\\s*\\d{3,}"
+      ],
+      "append": "{owner_name} | NMLS #{nmls_id} | {company_name} | NMLS #{company_nmls_id}",
+      "message": "State rules require the originator's name and NMLS ID (and usually the company's) on advertising, including social media. Maryland accepts the ID on the profile instead; this bundle adds it to every post.",
+      "source": "SAFE Act state rules; Texas SML RMLO social media requirements (2025); COMAR 09.03.06.06",
+      "checked": "2026-11-19"
+    },
+    {
+      "id": "EQUAL-HOUSING",
+      "level": "fix",
+      "title": "Equal Housing Opportunity or Lender statement",
+      "unless_any": [
+        "equal housing (opportunity|lender)",
+        "igualdad de oportunidades (en|de) vivienda"
+      ],
+      "append": "{eho_statement}",
+      "message": "Mortgage ads carry the Equal Housing statement your company uses. It is a legal requirement for some lenders (FDIC-supervised banks: 'Equal Housing Lender') and a policy of most others; this bundle adds it to every post as a conservative default. Remove it only on your compliance team's written say-so.",
+      "source": "12 CFR 338.3 (FDIC-supervised lenders); HUD Equal Housing Opportunity logo guidance; lender and investor policy (not verified as a federal rule for every originator)",
+      "checked": "2026-11-19"
+    },
+    {
+      "id": "MAP-GUARANTEE",
+      "level": "block",
+      "title": "Guaranteed approval or 'everyone qualifies'",
+      "if_any": [
+        "\\bguarantee(d|s)?\\b[^.\\n]{0,30}\\b(approv|loan|mortgage|rate|qualif|lowest)",
+        "\\b(everyone|anyone|all buyers) (qualifies|qualify|gets approved)\\b",
+        "\\bno credit (check|needed|required)\\b",
+        "\\b100% (approval|approved)\\b",
+        "\\bbad credit\\?? no problem\\b"
+      ],
+      "message": "Approval depends on underwriting. Promising it misrepresents the terms of credit. Say what you will do instead (review options, explain programs).",
+      "source": "Reg N (MAP Rule), 12 CFR 1014.3; FTC Act §5",
+      "checked": "2026-11-19"
+    },
+    {
+      "id": "MAP-GOVERNMENT",
+      "level": "flag",
+      "title": "Possible implied government affiliation",
+      "if_any": [
+        "\\b(government|federal|HUD|FHA|VA)\\b[^.\\n]{0,25}\\b(program wants|is giving|grant for everyone|free money|stimulus|official)\\b",
+        "\\bgovernment[- ]approved (lender|program)\\b",
+        "\\bnew government program\\b"
+      ],
+      "message": "FHA, VA and USDA loans are government-insured or guaranteed, but you are not the government. Do not suggest an official program, a government grant for all, or an endorsement.",
+      "source": "Reg N (MAP Rule), 12 CFR 1014.3(c)",
+      "checked": "2026-11-19"
+    },
+    {
+      "id": "MAP-FORECAST",
+      "level": "flag",
+      "title": "Rate forecast stated as a fact",
+      "if_any": [
+        "\\brates (will|are going to|are about to) (drop|fall|go down|rise|go up|spike|crash)\\b",
+        "\\bbuy before rates (go up|rise)\\b"
+      ],
+      "message": "Nobody knows next week's rate. Say what happened (the survey), not what will happen, or attribute a forecast to its source.",
+      "source": "Reg N (MAP Rule), 12 CFR 1014.3(e); FTC Act §5",
+      "checked": "2026-11-19"
+    },
+    {
+      "id": "MAP-FIXED",
+      "level": "flag",
+      "title": "'Fixed' next to an adjustable product",
+      "if_any": [
+        "\\b(ARM|adjustable)\\b[^.\\n]{0,40}\\bfixed (rate|payment) for (life|the life)\\b",
+        "\\bfixed\\b[^.\\n]{0,20}\\b(ARM|adjustable)\\b"
+      ],
+      "message": "An adjustable-rate product is fixed only for its initial period. Say how long, and that it adjusts after.",
+      "source": "Reg N (MAP Rule), 12 CFR 1014.3(b)",
+      "checked": "2026-11-19"
+    },
+    {
+      "id": "RESPA-REFERRAL",
+      "level": "flag",
+      "title": "Realtor co-marketing that may look like a referral payment",
+      "if_any": [
+        "\\b(referral fee|paid partner|pay for referrals|kickback|split the cost of (the )?ad)\\b",
+        "\\bsend (me|us) your (buyers|clients)\\b[^.\\n]{0,40}\\b(and|we'll|i'll) (pay|cover|buy)\\b"
+      ],
+      "message": "Co-marketing is fine when each party pays its share at fair value. Anything that reads as paying or being paid for referrals is a RESPA Section 8 risk; check with your compliance team.",
+      "source": "RESPA §8, 12 U.S.C. 2607; Regulation X, 12 CFR 1024.14; CFPB Compliance Bulletin 2015-05",
+      "checked": "2026-11-19"
+    },
+    {
+      "id": "FAIR-LENDING-WORDS",
+      "level": "flag",
+      "title": "Wording that may target or exclude a protected class",
+      "if_any": [
+        "\\b(perfect|ideal|great) for (young )?(families|couples|singles|retirees|seniors|young professionals|christians|newlyweds)\\b",
+        "\\b(no (kids|children)|adults only|empty nesters only|young buyers only)\\b",
+        "\\b(christian|jewish|muslim|hispanic|white|black|asian) (buyers|families|neighborhood|community)\\b"
+      ],
+      "message": "Fair lending and fair housing rules bar ads that indicate a preference based on familial status, age-linked proxies, religion, national origin, race, sex or disability. Describe the loan, not the borrower.",
+      "source": "Equal Credit Opportunity Act / Regulation B, 12 CFR 1002.4(b); Fair Housing Act 42 U.S.C. 3604(c)",
+      "checked": "2026-11-19"
+    },
+    {
+      "id": "SUPERLATIVE-UNPROVEN",
+      "level": "flag",
+      "title": "Superlative no one can verify",
+      "if_any": [
+        "\\b(lowest|best) (rates?|fees|closing costs) (in|around) (town|the state|texas|the area|[A-Z][a-z]+)\\b",
+        "\\b#1 (lender|loan officer)\\b"
+      ],
+      "unless_any": [
+        "\\bsource:",
+        "according to"
+      ],
+      "message": "'Lowest rates in town' needs proof the post shows. Use a specific, sourced fact from facts.md instead.",
+      "source": "FTC Act §5; Reg N (MAP Rule), 12 CFR 1014.3",
+      "checked": "2026-11-19"
+    }
+  ]
+}

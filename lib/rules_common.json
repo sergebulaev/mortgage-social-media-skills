@@ -1,0 +1,68 @@
+{
+  "checked": "2026-11-19",
+  "rules": [
+    {
+      "id": "FTC-REVIEW-INCENTIVE",
+      "level": "block",
+      "title": "Reward offered for a review or for a positive review",
+      "if_any": [
+        "(free|discount|% off|\\$\\d+ off|gift card|raffle|entry|prize|drink|dessert|coupon)[^.\\n]{0,60}\\b(review|5[- ]star|five[- ]star)",
+        "\\b(review|5[- ]star|five[- ]star)[^.\\n]{0,60}\\b(get|receive|earn|win)\\b[^.\\n]{0,30}(free|discount|% off|gift card|prize|entry)",
+        "(deja|déjanos)[^.\\n]{0,40}(reseña|5 estrellas)[^.\\n]{0,60}(gratis|descuento|regalo)"
+      ],
+      "message": "Rewards conditioned on a review, and above all on a positive one, are banned. Ask for honest reviews with no reward.",
+      "source": "FTC Rule on Consumer Reviews and Testimonials, 16 CFR 465.4; Endorsement Guides 16 CFR 255",
+      "checked": "2026-11-19"
+    },
+    {
+      "id": "FTC-FAKE-REVIEW",
+      "level": "block",
+      "title": "Invented or ghost-written customer review or testimonial",
+      "if_any": [
+        "\\b(write|draft|generate|make up|create)\\b[^.\\n]{0,30}\\b(reviews?|testimonials?)\\b[^.\\n]{0,40}\\b(from|as if|pretending|happy (customers|clients|patients))",
+        "\\[(customer|client|patient|happy) (name|review|quote)\\]"
+      ],
+      "message": "Never write a review or testimonial for a customer. Quote real reviews only verbatim, with the reviewer's consent where the vertical needs it, and name the source.",
+      "source": "FTC Rule on Consumer Reviews and Testimonials, 16 CFR 465.2",
+      "checked": "2026-11-19"
+    },
+    {
+      "id": "FTC-UNDISCLOSED-PAID",
+      "level": "flag",
+      "title": "Partner, gifted or paid mention without a disclosure",
+      "if_any": ["\\b(in partnership with|sponsored by|thanks to our partner|gifted by|courtesy of)\\b"],
+      "unless_any": ["#ad\\b", "#sponsored", "paid partnership", "\\bad\\b:", "#publicidad", "patrocinado"],
+      "message": "If anything of value changed hands, say so plainly (#ad, Paid partnership).",
+      "source": "FTC Endorsement Guides, 16 CFR 255.5",
+      "checked": "2026-11-19"
+    },
+    {
+      "id": "MUSIC-TRENDING-AUDIO",
+      "level": "flag",
+      "title": "Suggests trending or popular music for a business account",
+      "if_any": ["\\b(trending|popular|viral)\\s+(song|sound|audio|track)\\b", "\\buse (the|this) song\\b"],
+      "message": "Business accounts on Instagram and TikTok may use only the commercially cleared library (Meta Sound Collection, TikTok Commercial Music Library) or licensed audio.",
+      "source": "Instagram Help 402084904469945; TikTok Commercial Music Library help",
+      "checked": "2026-11-19"
+    },
+    {
+      "id": "FEES-PARTIAL-PRICE",
+      "level": "flag",
+      "title": "Ticket or lodging price that may leave out mandatory fees",
+      "if_any": ["\\b(tickets?|admission|per night|/night|a night|cover charge)\\b[^.\\n]{0,40}\\$\\d", "\\$\\d[\\d,.]*[^.\\n]{0,20}\\b(tickets?|admission|per night|/night|cover)\\b"],
+      "unless_any": ["\\b(all[- ]in|total price|includes (all )?(fees|taxes)|fees included|no additional fees)\\b"],
+      "message": "For live-event tickets and short-term lodging the advertised price must be the total including mandatory fees. Say \"all-in\" and mean it, or drop the price.",
+      "source": "FTC Rule on Unfair or Deceptive Fees, 16 CFR 464 (effective 2025-05-12)",
+      "checked": "2026-11-19"
+    },
+    {
+      "id": "AI-PLACEHOLDER-LEFT",
+      "level": "block",
+      "title": "Unfilled placeholder in the post",
+      "if_any": ["\\[(insert|your|business|name|link|date|phone|confirm)[^\\]]*\\]", "\\{\\w+\\}", "\\bTBD\\b", "\\bXX+\\b"],
+      "message": "A placeholder would go out as is. Fill it from memory or ask the user.",
+      "source": "bundle rule",
+      "checked": "2026-11-19"
+    }
+  ]
+}

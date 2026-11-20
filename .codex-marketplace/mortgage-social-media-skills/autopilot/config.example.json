@@ -1,0 +1,19 @@
+{
+  "repo": "mortgage-social-media-skills",
+  "language": "en",
+  "mode": "llm",
+  "max_drafts_per_day": 2,
+  "cards": true,
+  "platforms": ["facebook-REPLACE_WITH_YOUR_CONNECTION_ID", "linkedin-REPLACE_WITH_YOUR_CONNECTION_ID"],
+  "profile": {
+    "business_name": "Your company as licensed",
+    "owner_name": "Your name as licensed",
+    "nmls_id": "",
+    "company_name": "",
+    "company_nmls_id": "",
+    "eho_statement": "Equal Housing Opportunity",
+    "state": "TX",
+    "handle": "",
+    "pixfaro_brand_kit": "no"
+  }
+}

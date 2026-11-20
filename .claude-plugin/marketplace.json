@@ -1,0 +1,41 @@
+{
+  "name": "mortgage-social-media-skills",
+  "owner": {
+    "name": "Serge Bulaev",
+    "url": "https://github.com/sergebulaev"
+  },
+  "metadata": {
+    "description": "Claude skills for mortgage loan officer social media: Thursday rate posts from Freddie Mac PMMS, Reg Z and NMLS check, images and scheduling. Claude Code, Codex, Claude."
+  },
+  "plugins": [
+    {
+      "name": "mortgage-social-media-skills",
+      "source": "./",
+      "description": "3 skills for mortgage loan officers and brokers in Claude and Codex: a monthly social media content calendar, a post writer with a Reg Z trigger-term, APR, NMLS ID and Equal Housing check, and the Thursday Rate Desk that turns this week's Freddie Mac PMMS rate into compliant posts with a rate card. Business memory, drafts in Publora, an autopilot that drafts every Thursday.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Serge Bulaev",
+        "url": "https://github.com/sergebulaev"
+      },
+      "homepage": "https://github.com/sergebulaev/mortgage-social-media-skills",
+      "license": "MIT",
+      "keywords": [
+        "mortgage",
+        "loan-officer",
+        "mortgage-broker",
+        "mortgage-marketing",
+        "social-media",
+        "content-calendar",
+        "reg-z",
+        "nmls",
+        "freddie-mac",
+        "claude-skills",
+        "codex-skills",
+        "agent-skills",
+        "anthropic",
+        "ai-agents"
+      ],
+      "category": "productivity"
+    }
+  ]
+}
