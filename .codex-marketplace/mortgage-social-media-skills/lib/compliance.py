@@ -15,6 +15,8 @@ A rule:
      "unless_scope": "sentence",            # optional: look for unless_* in the triggering sentence only
      "append": "{apr_disclosure}",
      "states": ["*"], "states_except": ["TX"], "languages": ["en", "es"],
+     "unless_profile": {"service_charge": ["", "none", "no"]},  # skip when the profile
+                                            # field (lowercased) is one of these values
      "message": "...", "source": "12 CFR 1026.24(c),(d)", "checked": "2026-11-19"}
 
 Levels:
@@ -101,7 +103,10 @@ def normalize(text: str) -> str:
     return text.replace("’", "'").replace("‘", "'").replace(" ", " ")
 
 
-def _applies(rule: dict, state: str, language: str, platform: str) -> bool:
+def _applies(rule: dict, state: str, language: str, platform: str, profile: Optional[dict] = None) -> bool:
+    for key, values in (rule.get("unless_profile") or {}).items():
+        if str((profile or {}).get(key, "")).strip().lower() in {v.lower() for v in values}:
+            return False
     states = rule.get("states") or ["*"]
     if "*" not in states and (state or "").upper() not in {s.upper() for s in states}:
         return False
@@ -140,7 +145,7 @@ def check(text: str, *, profile: Optional[dict] = None, rules: Optional[list] = 
     norm = normalize(text)
     findings = []
     for rule in rules:
-        if not _applies(rule, state, language, platform):
+        if not _applies(rule, state, language, platform, profile):
             continue
         if rule.get("if_any"):
             matches = [m for p in rule["if_any"] for m in re.finditer(p, norm, re.I | re.M)]

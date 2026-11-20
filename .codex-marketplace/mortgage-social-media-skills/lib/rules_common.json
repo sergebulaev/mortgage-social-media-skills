@@ -7,7 +7,9 @@
       "title": "Reward offered for a review or for a positive review",
       "if_any": [
         "(free|discount|% off|\\$\\d+ off|gift card|raffle|entry|prize|drink|dessert|coupon)[^.\\n]{0,60}\\b(review|5[- ]star|five[- ]star)",
-        "\\b(review|5[- ]star|five[- ]star)[^.\\n]{0,60}\\b(get|receive|earn|win)\\b[^.\\n]{0,30}(free|discount|% off|gift card|prize|entry)",
+        "\\b(review|5[- ]star|five[- ]star)[^.\\n]{0,60}\\b(get|receive|earn|win|enter|for a|for an|and (your|you|we|get))\\b[^.\\n]{0,40}(free|discount|% off|\\$\\d+ off|gift card|raffle|drawing|giveaway|prize|on us|on the house|comped|coupon|credit|points)",
+        "\\b(review|5[- ]star|five[- ]star)[^.\\n]{0,60}\\b(is|are|'s) (on us|on the house|free)\\b",
+        "\\b(show|post|leave)\\b[^.\\n]{0,20}\\b(us )?(your )?(google |yelp |facebook )?(review|5[- ]star|five[- ]star)[^.\\n]{0,40}(free|discount|% off|\\$\\d+ off|gift card|raffle|drawing|giveaway|prize|on us|on the house|comped|coupon|credit|points)",
         "(deja|déjanos)[^.\\n]{0,40}(reseña|5 estrellas)[^.\\n]{0,60}(gratis|descuento|regalo)"
       ],
       "message": "The FTC rule bans rewards conditioned on a review expressing a sentiment (16 CFR 465.4); Google, Yelp and Meta bar any reward for a review at all. Ask for honest reviews with no reward.",
@@ -30,8 +32,17 @@
       "id": "FTC-UNDISCLOSED-PAID",
       "level": "flag",
       "title": "Partner, gifted or paid mention without a disclosure",
-      "if_any": ["\\b(in partnership with|sponsored by|thanks to our partner|gifted by|courtesy of)\\b"],
-      "unless_any": ["#ad\\b", "#sponsored", "paid partnership", "\\bad\\b:", "#publicidad", "patrocinado"],
+      "if_any": [
+        "\\b(in partnership with|sponsored by|thanks to our partner|gifted by|courtesy of)\\b"
+      ],
+      "unless_any": [
+        "#ad\\b",
+        "#sponsored",
+        "paid partnership",
+        "\\bad\\b:",
+        "#publicidad",
+        "patrocinado"
+      ],
       "message": "If anything of value changed hands, say so plainly (#ad, Paid partnership).",
       "source": "FTC Endorsement Guides, 16 CFR 255.5",
       "checked": "2026-11-19"
@@ -40,7 +51,10 @@
       "id": "MUSIC-TRENDING-AUDIO",
       "level": "flag",
       "title": "Suggests trending or popular music for a business account",
-      "if_any": ["\\b(trending|popular|viral)\\s+(song|sound|audio|track)\\b", "\\buse (the|this) song\\b"],
+      "if_any": [
+        "\\b(trending|popular|viral)\\s+(song|sound|audio|track)\\b",
+        "\\buse (the|this) song\\b"
+      ],
       "message": "Business accounts on Instagram and TikTok may use only the commercially cleared library (Meta Sound Collection, TikTok Commercial Music Library) or licensed audio.",
       "source": "Instagram Help 402084904469945; TikTok Commercial Music Library help",
       "checked": "2026-11-19"
@@ -49,8 +63,13 @@
       "id": "FEES-PARTIAL-PRICE",
       "level": "flag",
       "title": "Ticket or lodging price that may leave out mandatory fees",
-      "if_any": ["\\b(tickets?|admission|per night|/night|a night|cover charge)\\b[^.\\n]{0,40}\\$\\d", "\\$\\d[\\d,.]*[^.\\n]{0,20}\\b(tickets?|admission|per night|/night|cover)\\b"],
-      "unless_any": ["\\b(all[- ]in|total price|includes (all )?(fees|taxes)|fees included|no additional fees)\\b"],
+      "if_any": [
+        "\\b(tickets?|admission|per night|/night|a night|cover charge)\\b[^.\\n]{0,40}\\$\\d",
+        "\\$\\d[\\d,.]*[^.\\n]{0,20}\\b(tickets?|admission|per night|/night|cover)\\b"
+      ],
+      "unless_any": [
+        "\\b(all[- ]in|total price|includes (all )?(fees|taxes)|fees included|no additional fees)\\b"
+      ],
       "message": "For live-event tickets and short-term lodging the advertised price must be the total including mandatory fees. Say \"all-in\" and mean it, or drop the price.",
       "source": "FTC Rule on Unfair or Deceptive Fees, 16 CFR 464 (effective 2025-05-12)",
       "checked": "2026-11-19"
@@ -59,7 +78,12 @@
       "id": "AI-PLACEHOLDER-LEFT",
       "level": "block",
       "title": "Unfilled placeholder in the post",
-      "if_any": ["\\[(insert|your|business|name|link|date|phone|confirm)[^\\]]*\\]", "\\{\\w+\\}", "\\bTBD\\b", "\\bXX+\\b"],
+      "if_any": [
+        "\\[(insert|your|business|name|link|date|phone|confirm)[^\\]]*\\]",
+        "\\{\\w+\\}",
+        "\\bTBD\\b",
+        "\\bXX+\\b"
+      ],
       "message": "A placeholder would go out as is. Fill it from memory or ask the user.",
       "source": "bundle rule",
       "checked": "2026-11-19"

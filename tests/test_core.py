@@ -57,6 +57,23 @@ class ComplianceEngine(unittest.TestCase):
         self.assertEqual(rep.verdict, "FAIL")
         self.assertIn("FTC-REVIEW-INCENTIVE", [f.rule_id for f in rep.findings])
 
+    def test_review_incentive_phrasings(self):
+        for t in ("Show your review at the bar for a free drink",
+                  "Post a review and your next coffee is on us",
+                  "Review us and enter our monthly drawing for a gift card",
+                  "Show us your Yelp review for a free dessert"):
+            ids = [f.rule_id for f in compliance.check(t, rules=self.rules).findings]
+            self.assertIn("FTC-REVIEW-INCENTIVE", ids, t)
+        for t in ("Tell us how we did on Google", "Thanks for 500 five-star reviews! Free coffee for everyone Friday."):
+            ids = [f.rule_id for f in compliance.check(t, rules=self.rules).findings]
+            self.assertNotIn("FTC-REVIEW-INCENTIVE", ids, t)
+
+    def test_unless_profile_skips_rule(self):
+        rule = {"id": "X-FEE", "level": "flag", "title": "t", "message": "m", "source": "s",
+                "if_any": ["\\$\\d"], "unless_profile": {"service_charge": ["", "none"]}}
+        self.assertEqual(compliance.check("Soup $11", rules=[rule], profile={"service_charge": "None"}).verdict, "PASS")
+        self.assertEqual(compliance.check("Soup $11", rules=[rule], profile={"service_charge": "18%"}).verdict, "REVIEW")
+
     def test_placeholder_blocked(self):
         self.assertEqual(compliance.check("Call us at [phone] today", rules=self.rules).verdict, "FAIL")
 
