@@ -68,7 +68,10 @@ learned: ...
    Python: `lib.feeds.pmms.latest(lib.feeds.pmms.parse(lib.feeds.pmms.fetch()))`).
    Check the newest row's date: if it is not this week (Thursday, or
    Wednesday in a holiday week), say the survey is not out yet and stop. Never
-   reuse last week's number as this week's.
+   reuse last week's number as this week's. Save the `latest()` result as
+   `pmms-week.json` next to the drafts: it holds the computed changes
+   (`change_30`, `change_15`, year-ago figures) and is the `--source` for the
+   check, so the change can be quoted and still traces to the survey.
 3. **Work out the story** from the numbers only: up, down or flat; the size
    of the move in percentage points (the `change_30` string, e.g. "+0.17");
    the year-over-year comparison. One angle per network:
@@ -83,7 +86,7 @@ learned: ...
    allowed: "today's rate", "my rate", "rates as low as", a payment amount for
    any loan size, a down payment percent, "rates will", "lock now before".
 5. **Check every post** (`../../references/compliance.md`):
-   `python3 <bundle>/scripts/check_post.py post.txt --memory ./mortgage-memory --source <pmms file> --platform <network> --fix`
+   `python3 <bundle>/scripts/check_post.py post.txt --memory ./mortgage-memory --source pmms-week.json --platform <network> --fix`
    (`scripts/check_post.py` is in this bundle's root, two folders above this SKILL.md (`${CLAUDE_PLUGIN_ROOT}/scripts/check_post.py` in a plugin install); run it by that absolute path from the working folder).
    Expect the fixes RATE-AVERAGE-LABEL, NMLS-ID and EQUAL-HOUSING to be
    appended: that is the normal PASS path. By hand, end every rate post with

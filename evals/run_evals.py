@@ -93,7 +93,8 @@ def profile() -> dict:
 def showed_check(text: str) -> bool:
     """A verdict was shown: PASS, FAIL or REVIEW (as the skills print it), not
     merely the word "compliance"."""
-    return bool(re.search(r"\b(PASS|FAIL|REVIEW)\b", text))
+    return bool(re.search(r"\b(PASS|FAIL|REVIEW)\b", text)
+                or re.search(r"compliance check\W{0,4}(passed|failed|pass|fail|review)", text, re.I))
 
 
 def asks_question(text: str) -> bool:

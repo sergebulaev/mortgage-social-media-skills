@@ -28,7 +28,7 @@
       "title": "Down payment amount or percent (house policy: treated like a trigger term)",
       "if_any": [
         "\\b\\d+(\\.\\d+)?\\s?(%|percent)\\s*down\\b",
-        "\\$\\s?[\\d,]+\\s*down\\b",
+        "\\$\\s?[1-9][\\d,]*\\s*down\\b",
         "\\bdown payments? (of|as low as|from|starting at)\\s*(\\$\\s?[\\d,]+|\\d+(\\.\\d+)?\\s?(%|percent))"
       ],
       "unless_all": [
@@ -235,7 +235,7 @@
       "level": "fix",
       "title": "Points or a finance charge amount is a trigger term",
       "if_any": [
-        "\\b\\d+(\\.\\d+)?\\s+(discount )?points?\\b",
+        "\\b\\d+(\\.\\d+)?\\s+(discount |origination )?points?\\b(?!\\s+(from|higher|lower|above|below|since|in|this|last|over|week|vs))",
         "\\bfinance charge of\\b",
         "\\b(only|just) \\$\\s?[\\d,]+ (in )?(closing costs|fees)\\b"
       ],
@@ -247,7 +247,10 @@
       "append": "{apr_disclosure}",
       "message": "The amount of any finance charge (points, a dollar figure for fees) is a trigger term: the down payment, terms and APR must follow. Usual fix: talk about points without a number.",
       "source": "Regulation Z, 12 CFR 1026.24(d)(1)(iv)",
-      "checked": "2026-11-19"
+      "checked": "2026-11-19",
+      "unless_any": [
+        "percentage points?"
+      ]
     }
   ]
 }

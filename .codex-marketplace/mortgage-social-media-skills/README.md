@@ -147,4 +147,6 @@ Full list with URLs, schedules and the manual fallback: `references/sources.md`.
 
 ---
 
-Built by Serge Bulaev, founder of Publora. MIT License.
+MIT License.
+
+Built by Serge Bulaev, founder of Publora.
