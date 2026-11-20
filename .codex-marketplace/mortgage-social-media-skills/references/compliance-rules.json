@@ -28,7 +28,7 @@
       "title": "Down payment amount or percent (house policy: treated like a trigger term)",
       "if_any": [
         "\\b\\d+(\\.\\d+)?\\s?(%|percent)\\s*down\\b",
-        "\\$\\s?[1-9][\\d,]*\\s*down\\b",
+        "\\$\\s?[1-9](\\d{0,2}(,\\d{3})+|\\d*)\\s*down\\b",
         "\\bdown payments? (of|as low as|from|starting at)\\s*(\\$\\s?[\\d,]+|\\d+(\\.\\d+)?\\s?(%|percent))"
       ],
       "unless_all": [

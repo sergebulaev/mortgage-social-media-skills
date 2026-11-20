@@ -109,8 +109,8 @@ def _applies(rule: dict, state: str, language: str, platform: str) -> bool:
     if langs and language and language not in langs:
         return False
     plats = rule.get("platforms")
-    if plats and platform and platform not in plats:
-        return False
+    if plats and platform not in plats:
+        return False  # a platform-scoped rule runs only when that platform is named
     return True
 
 
