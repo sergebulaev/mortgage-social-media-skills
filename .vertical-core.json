@@ -1,5 +1,5 @@
 {
- "core_commit": "uncommitted",
+ "core_commit": "64f5239",
  "vertical": "mortgage",
  "note": "Written by vertical-skills-core/generator. Shared and generated files are listed with their hashes; do not edit them here.",
  "files": {
@@ -10,8 +10,8 @@
   ".codexignore": "ceee04d122e062f1d83815397faedccbda792c44cf2ae84eb60092edbcc7fa2a",
   ".env.example": "07150ac747ba423a1f7ce6f679258c91fc268a3865c3873a8fa3259fae4b6240",
   ".github/dependabot.yml": "883b95e3be554fbadd92b315e4a8c6ea6ca688b64924e22dd61222b07f683507",
-  ".github/workflows/autopilot.yml": "5f54f60bf338f256526d6e246b6639d2eb5637e69dc0c640ee9588f0b56c5aef",
-  ".github/workflows/hol-plugin-scanner.yml": "530013d611fa9c956d9a0d85b546964dbea37a7f6c1cbb8a71ed3479c07f25ad",
+  ".github/workflows/autopilot.yml": "84cb7d944ac9dec6a79bc312a5f65c35e27713a992ec938cacc58438ff878dd5",
+  ".github/workflows/hol-plugin-scanner.yml": "5ff382a42d8495d0dcc8fa6df58b6e1df21605e922b9bbf1a686bff501e7b64f",
   ".github/workflows/verify.yml": "74c4b7437a1c6b28f7562a32aea67461b8098c9dd229f9082b3ad705c7b0886d",
   ".gitignore": "437af2bb03628d9ed7bd6c27de84394107d574c6516af0a5903a3ed5fb3a5e84",
   "AGENTS.md": "9983cf751ee6707cd398ac0a205c0915379c2654773edf508b428b9882276464",

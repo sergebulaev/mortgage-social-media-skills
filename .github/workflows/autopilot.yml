@@ -1,7 +1,8 @@
 name: Autopilot
 
 # Watches the Freddie Mac weekly mortgage rate survey (PMMS) and leaves DRAFTS in Publora. Never publishes.
-# Setup: references/autopilot.md. Disabled until autopilot/config.json exists.
+# Setup: references/autopilot.md. Runs only in your copy of the repo (not in
+# the original), and only once autopilot/config.json exists.
 
 on:
   schedule:
@@ -26,12 +27,18 @@ concurrency:
 
 jobs:
   watch:
-    if: ${{ hashFiles('autopilot/config.json') != '' }}
+    if: ${{ github.repository_owner != 'sergebulaev' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Config present?
+        id: cfg
+        run: |
+          if [ -f autopilot/config.json ]; then echo "ok=true" >> "$GITHUB_OUTPUT"
+          else echo "No autopilot/config.json yet: see references/autopilot.md" >> "$GITHUB_STEP_SUMMARY"; echo "ok=false" >> "$GITHUB_OUTPUT"; fi
       - name: Watch the source and draft
+        if: ${{ steps.cfg.outputs.ok == 'true' }}
         env:
           PUBLORA_API_KEY: ${{ secrets.PUBLORA_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -44,7 +51,7 @@ jobs:
           [ "$NO_LLM" = "true" ] && args="$args --no-llm"
           python3 autopilot/watch.py $args
       - name: Remember what was drafted (dedup across runs)
-        if: ${{ inputs.dry_run != true }}
+        if: ${{ steps.cfg.outputs.ok == 'true' && inputs.dry_run != true }}
         run: |
           if [ -n "$(git status --porcelain autopilot/state.json)" ]; then
             git config user.name "autopilot"
