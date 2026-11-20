@@ -12,9 +12,9 @@ A rule:
      "if_any": ["\\b\\d+(\\.\\d+)?\\s?%\\s*(rate|fixed)", "\\$[\\d,]+\\s*/\\s*mo"],
      "unless_any": ["\\bAPR\\b"],         # skip when any of these is present
      "unless_all": ["APR", "down", "term"], # skip only when ALL are present
-     "require_profile": ["nmls_id"],
+     "unless_scope": "sentence",            # optional: look for unless_* in the triggering sentence only
      "append": "{apr_disclosure}",
-     "states": ["*"], "languages": ["en", "es"],
+     "states": ["*"], "states_except": ["TX"], "languages": ["en", "es"],
      "message": "...", "source": "12 CFR 1026.24(c),(d)", "checked": "2026-11-19"}
 
 Levels:
@@ -105,6 +105,8 @@ def _applies(rule: dict, state: str, language: str, platform: str) -> bool:
     states = rule.get("states") or ["*"]
     if "*" not in states and (state or "").upper() not in {s.upper() for s in states}:
         return False
+    if (state or "").upper() in {s.upper() for s in rule.get("states_except", [])}:
+        return False
     langs = rule.get("languages")
     if langs and language and language not in langs:
         return False
@@ -145,9 +147,17 @@ def check(text: str, *, profile: Optional[dict] = None, rules: Optional[list] = 
             trigger = _search(rule["if_any"], norm)
             if not trigger:
                 continue
-        if _search(rule.get("unless_any"), norm):
+        # unless_* are looked up in the whole post, or only in the sentence that
+        # triggered when the rule says "unless_scope": "sentence" (so "Never
+        # give ibuprofen" cannot excuse "Try Benadryl" two sentences later).
+        scope = norm
+        if trigger and rule.get("unless_scope") == "sentence":
+            start = max(norm.rfind(c, 0, trigger.start()) for c in ".!?\n") + 1
+            ends = [i for i in (norm.find(c, trigger.end()) for c in ".!?\n") if i != -1]
+            scope = norm[start:(min(ends) + 1) if ends else len(norm)]
+        if _search(rule.get("unless_any"), scope):
             continue
-        if rule.get("unless_all") and all(_search([rx], norm) for rx in rule["unless_all"]):
+        if rule.get("unless_all") and all(_search([rx], scope) for rx in rule["unless_all"]):
             continue
         missing = []
         fixable = False

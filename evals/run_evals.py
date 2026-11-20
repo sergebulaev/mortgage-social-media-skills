@@ -128,9 +128,9 @@ def family_cases(cfg: dict) -> dict:
             if not posted.strip():
                 return False, "no fixed post produced (asked to fix and save a draft)"
             if re.search(viol["must_not_survive"], posted, re.I):
-                rep = compliance.check(posted, profile=profile())
-                if rep.verdict == "FAIL":
-                    return False, f"violation survived into the post: {viol['must_not_survive']}"
+                # A flag-level violation (REVIEW) that survives is still a miss:
+                # the case asked to fix it.
+                return False, f"violation survived into the post: {viol['must_not_survive']}"
             return True, "violation caught and fixed, nothing scheduled"
         return prompt, setup, grade
 

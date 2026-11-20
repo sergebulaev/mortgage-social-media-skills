@@ -159,8 +159,9 @@ def main() -> int:
     drafted = state["drafts_by_day"].get(today, 0)
     for event in events:
         eid = event["id"]
-        if eid in state["seen"]:
-            continue
+        seen = state["seen"].get(eid)
+        if seen and not (seen.get("result") == "rejected" and seen.get("tries", 1) < 2):
+            continue  # drafted already, or rejected twice: a third model try is not worth it
         if drafted >= limit:
             summary(f"Daily limit of {limit} drafts reached; {eid} waits for tomorrow.")
             break
@@ -173,13 +174,17 @@ def main() -> int:
         report = compliance.autofix(text, profile=profile, rules=rules, language=language)
         text = report.text
         bad_numbers = provenance.unsupported_numbers(text, [event["data"], profile])
+        # A vertical may add its own check (e.g. recall posts naming no brand the
+        # FDA notice does not name): trigger.extra_check(event, text) -> [problems].
+        extra = getattr(trigger, "extra_check", lambda e, t: [])(event, text)
         voice_check = style.lint(text)
-        if report.verdict != "PASS" or bad_numbers or not voice_check["ok"]:
-            reasons = [f.line() for f in report.findings]
+        if report.verdict != "PASS" or bad_numbers or not voice_check["ok"] or extra:
+            reasons = [f.line() for f in report.findings] + [f"vertical check: {x}" for x in extra]
             reasons += [f"number without source: {n}" for n in bad_numbers]
             reasons += [f"voice: {v['code']} {v['match']}" for v in voice_check["strict"]]
             summary(f"- {eid}: NOT drafted, check {report.verdict}:\n  " + "\n  ".join(reasons))
-            state["seen"][eid] = {"date": today, "result": "rejected"}
+            state["seen"][eid] = {"date": today, "result": "rejected",
+                                  "tries": (seen or {}).get("tries", 0) + 1}
             continue
 
         media, card_note = [], ""

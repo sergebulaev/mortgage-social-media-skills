@@ -17,7 +17,9 @@ code does not change with who asks or how urgent it is.
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -27,17 +29,45 @@ sys.path.insert(0, str(ROOT))
 from lib import compliance, memory, provenance, style  # noqa: E402
 
 
+CONSENT_LINE = re.compile(r"(shared |posted )?with (their|his|her|the (patient|client|owner|member|family)'?s?) "
+                          r"(written )?(permission|consent)|con (su )?(permiso|consentimiento)", re.I)
+
+
+def consent_problem(text: str, memory_root, platform: str) -> str:
+    """A post may claim consent only if consent.md holds a live entry for this
+    network. The rules accept the consent line as proof; this is the check
+    that the line is true."""
+    if not CONSENT_LINE.search(text):
+        return ""
+    if memory_root is None:
+        return "the post says consent was given, but no memory folder was given to check consent.md"
+    path = Path(memory_root) / "consent.md"
+    entries = memory.parse_entries(path.read_text(encoding="utf-8")) if path.is_file() else []
+    today = dt.date.today().isoformat()
+    for e in entries:
+        agreed = e.get("agreed", "").lower().startswith("yes")
+        live = not e.get("expires") or e.get("expires", "") >= today
+        scope = e.get("scope", "").lower()
+        if agreed and live and (not platform or not scope or platform.lower() in scope or "all" in scope):
+            return ""
+    return (f"the post says consent was given, but consent.md has no agreed, unexpired entry covering "
+            f"{platform or 'this network'}")
+
+
 def run(text: str, *, profile: dict, sources: list, platform: str = "", language: str = "",
-        fix: bool = False) -> dict:
+        fix: bool = False, memory_root=None) -> dict:
     report = (compliance.autofix if fix else compliance.check)(
         text, profile=profile, platform=platform, language=language)
     final = report.text
     numbers = provenance.unsupported_numbers(final, [*sources, profile])
     voice = style.lint(final, platform)
     verdict = report.verdict
+    consent = consent_problem(final, memory_root, platform)
+    if consent and verdict == "PASS":
+        verdict = "REVIEW"
     if numbers or not voice["ok"]:
         verdict = "FAIL"
-    return {"verdict": verdict, "text": final, "compliance": report.summary(),
+    return {"verdict": verdict, "text": final, "compliance": report.summary(), "consent": consent,
             "compliance_verdict": report.verdict, "applied": report.applied,
             "unsupported_numbers": numbers, "voice": voice}
 
@@ -67,11 +97,13 @@ def main() -> int:
         except ValueError:
             sources.append(raw)
     out = run(text, profile=profile, sources=sources, platform=args.platform,
-              language=args.language, fix=args.fix)
+              language=args.language, fix=args.fix, memory_root=args.memory)
     if args.json:
         print(json.dumps(out, indent=2, ensure_ascii=False))
     else:
         print(out["compliance"])
+        if out["consent"]:
+            print("Consent: " + out["consent"])
         if out["unsupported_numbers"]:
             print("Numbers with no source: " + ", ".join(out["unsupported_numbers"]))
         for f in out["voice"]["strict"]:

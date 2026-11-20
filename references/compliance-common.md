@@ -6,7 +6,7 @@ The rules every bundle in the family checks, on top of its own
 
 | Id | Level | Rule | Example that fails | Fix | Source |
 |---|---|---|---|---|---|
-| FTC-REVIEW-INCENTIVE | block | No reward for a review, above all for a positive one | "Leave us a 5-star review and get a free dessert" | "Tell us how we did on Google" (no reward) | FTC Consumer Reviews and Testimonials Rule, 16 CFR 465.4 (in force 2024-10-21) |
+| FTC-REVIEW-INCENTIVE | block | No reward for a review: the FTC bans rewards tied to a sentiment, Google, Yelp and Meta ban any reward | "Leave us a 5-star review and get a free dessert" | "Tell us how we did on Google" (no reward) | FTC Consumer Reviews and Testimonials Rule, 16 CFR 465.4 (in force 2024-10-21) |
 | FTC-FAKE-REVIEW | block | Never write a review or testimonial for a customer; quote real ones verbatim with the source | "Write 5 reviews from happy clients" | refuse; offer to ask real clients | 16 CFR 465.2 |
 | FTC-UNDISCLOSED-PAID | flag | A partner, gifted or paid mention says so | "Thanks to our partner X!" with no disclosure | add "#ad" or "Paid partnership" when value changed hands | FTC Endorsement Guides, 16 CFR 255.5 |
 | MUSIC-TRENDING-AUDIO | flag | Business accounts use only commercially cleared audio | "Use the trending song" | "Pick a track from the Meta Sound Collection / TikTok Commercial Music Library" | Instagram Help; TikTok Commercial Music Library |

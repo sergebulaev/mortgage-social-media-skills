@@ -23,3 +23,5 @@ jobs:
         run: python3 scripts/check_markdown_references.py
       - name: Offline tests (core contract, compliance graders, parsers, autopilot)
         run: python3 -m unittest discover -s tests -v
+      - name: Codex package matches the sources
+        run: python3 scripts/sync_codex_marketplace.py && git diff --exit-code -- .codex-marketplace

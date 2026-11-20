@@ -21,14 +21,15 @@ from typing import Any, Iterable
 
 NUM = re.compile(r"(?<![\w.])[-+]?\$?(?:\d{1,3}(?:,\d{3})+(?!\d)|\d+)(?:\.\d+)?(?:\s?%|k\b|K\b)?")
 URL = re.compile(r"https?://\S+|www\.\S+|[@#][\w.]+", re.I)
-MONTHS = r"(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?"
+MONTHS = (r"(?:january|february|march|april|may|june|july|august|september|october|november|december"
+          r"|jan|feb|mar|apr|jun|jul|aug|sept|sep|oct|nov|dec)\b\.?")
 DATE_BITS = [
     re.compile(rf"\b{MONTHS}\s+\d{{1,2}}(?:st|nd|rd|th)?\b", re.I),
     re.compile(rf"\b\d{{1,2}}(?:st|nd|rd|th)?\s+(?:of\s+)?{MONTHS}", re.I),
     re.compile(r"\b\d{1,2}/\d{1,2}(?:/\d{2,4})?\b"),
     re.compile(r"\b\d{4}-\d{2}-\d{2}\b"),
-    re.compile(r"\b\d{1,2}(?::\d{2})?\s?(?:am|pm|a\.m\.|p\.m\.)", re.I),
-    re.compile(r"\b\d{1,2}:\d{2}\b"),
+    re.compile(r"\b\d{1,2}(?::\d{2})?\s?(?:am|pm)\b|\b\d{1,2}(?::\d{2})?\s?(?:a\.m\.|p\.m\.)", re.I),
+    re.compile(r"\b\d{1,3}:\d{1,3}(?:[-\u2013]\d{1,3})?\b"),  # clock times and scripture references (Psalm 119:105)
     re.compile(r"\b(?:de\s+)?\d{1,2}\s+de\s+[a-záéíóú]+", re.I),
 ]
 

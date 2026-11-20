@@ -80,6 +80,12 @@ class Provenance(unittest.TestCase):
         self.assertEqual(provenance.unsupported_numbers("Median $725,000", [{"p": "725000"}]), [])
         self.assertEqual(provenance.unsupported_numbers("$1,200/mo", [{}]), ["$1,200"])
 
+    def test_masks_need_word_boundaries(self):
+        self.assertEqual(provenance.unsupported_numbers("Refer a friend, get a $50 Amazon card", [{}]), ["$50"])
+        self.assertEqual(provenance.unsupported_numbers("We use 40 amalgam-free kits", [{}]), ["40"])
+        self.assertEqual(provenance.unsupported_numbers("Open until 6 pm on December 24", [{}]), [])
+        self.assertEqual(provenance.unsupported_numbers("Psalm 119:105 and Psalm 23:1-3", [{}]), [])
+
     def test_dates_counts_years_free(self):
         self.assertEqual(provenance.unsupported_numbers(
             "3 things to check before Nov 19, 2026 at 10:30 am", [{}]), [])

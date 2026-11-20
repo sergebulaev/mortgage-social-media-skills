@@ -10,8 +10,8 @@
         "\\b(review|5[- ]star|five[- ]star)[^.\\n]{0,60}\\b(get|receive|earn|win)\\b[^.\\n]{0,30}(free|discount|% off|gift card|prize|entry)",
         "(deja|déjanos)[^.\\n]{0,40}(reseña|5 estrellas)[^.\\n]{0,60}(gratis|descuento|regalo)"
       ],
-      "message": "Rewards conditioned on a review, and above all on a positive one, are banned. Ask for honest reviews with no reward.",
-      "source": "FTC Rule on Consumer Reviews and Testimonials, 16 CFR 465.4; Endorsement Guides 16 CFR 255",
+      "message": "The FTC rule bans rewards conditioned on a review expressing a sentiment (16 CFR 465.4); Google, Yelp and Meta bar any reward for a review at all. Ask for honest reviews with no reward.",
+      "source": "FTC Rule on Consumer Reviews and Testimonials, 16 CFR 465.4; Endorsement Guides 16 CFR 255; Google Maps user-contributed content policy (incentivized reviews)",
       "checked": "2026-11-19"
     },
     {

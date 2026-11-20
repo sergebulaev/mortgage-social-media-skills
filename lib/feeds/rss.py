@@ -8,6 +8,7 @@ from email.utils import parsedate_to_datetime
 from .. import _http
 
 ATOM = "{http://www.w3.org/2005/Atom}"
+MEDIA = "{http://search.yahoo.com/mrss/}"  # YouTube puts the description in media:group
 
 
 def fetch(url: str) -> bytes:
@@ -41,7 +42,8 @@ def parse(raw: bytes) -> list[dict]:
         items.append({"title": _clean(it.findtext(ATOM + "title")),
                       "link": link.get("href", "") if link is not None else "",
                       "date": _date(it.findtext(ATOM + "published") or it.findtext(ATOM + "updated")),
-                      "summary": _clean(it.findtext(ATOM + "summary") or "")[:600],
+                      "summary": _clean(it.findtext(ATOM + "summary")
+                                        or it.findtext(f"{MEDIA}group/{MEDIA}description") or "")[:600],
                       "guid": it.findtext(ATOM + "id") or ""})
     return items
 
