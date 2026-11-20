@@ -1,5 +1,5 @@
 {
- "core_commit": "d8903f2",
+ "core_commit": "476c549",
  "vertical": "mortgage",
  "note": "Written by vertical-skills-core/generator. Shared and generated files are listed with their hashes; do not edit them here.",
  "files": {
@@ -19,14 +19,14 @@
   "LICENSE": "3bed370028ba097899356218693c17e14ee8ed000e94386d33691ccc2a41d718",
   "SECURITY.md": "a6fd99daceb9ba6666cb874a96021b0290f893db9ab87b91a9da2fea27a2ebf5",
   "assets/icon.svg": "72e763bdaf22d9402fd13d43e9884d319334addedc3c49ec102816bdeeb1a6a9",
-  "autopilot/watch.py": "37721c2c0c2e2ba91a8617596ef7df6d525789d1b6ca9fcbc98c8ab8181c9ca2",
+  "autopilot/watch.py": "bba5adf06bad5567f8357d50ccfc4c87e0d6e9115167087bc88e35eacd0c3811",
   "evals/mock_publora_mcp.py": "8d28ccb6c9888c5525949142ec222dc15a11e75aa2f67f63fd6cae22cb1fe18e",
   "evals/run_evals.py": "71c0c32d304545b0af14ef1e7c36435a674c3bae7ae42566e64152788da5f776",
   "lib/__init__.py": "cd17e4b2f5c67b294fc5f38764307da8c1678c4714416549e34874ab0ca416cc",
   "lib/_env.py": "3ef985cdad2a0149c6f9d86c9aab0f9b213e35dd97579f2f31b5f5122639a0ba",
   "lib/_http.py": "f12904c4213943d196784a6ad4c3ef6836ef6a1ab7d585f3e48e10a575e5ab74",
   "lib/cards.py": "28c11e89295b49a9d201fe4bc1b2d53482b65e94aaacde0f720e1aa6383070ab",
-  "lib/compliance.py": "49f09c68c5cc8d4d446fb7d088a1418a8615652783b589e469e89f1ff96a4652",
+  "lib/compliance.py": "47a14436ec0715259b13206d9d0e124528cef0e2c073da8151fc7e1916779c83",
   "lib/feeds/__init__.py": "bb8535126c8b5740c78d403046abaf833589d2e3d56296e4a22f6a930a001363",
   "lib/feeds/holidays.py": "d00334186111d1ae47e06a1076275e683baf6ba112b265e070df1fd99d7a89a1",
   "lib/feeds/pmms.py": "7611a01aec0b87729c84bd7c645a7bab428c6fb67544318956d12dc2b2958f85",
@@ -48,7 +48,7 @@
   "memory.example/profile.md": "64acb2ca65dbf828ea46dce0e35b98331c2df8b0f3599fa1e2ece07d3ba6ee9e",
   "memory.example/rules.md": "ead4609845b78fd8a716a0394584820e977a7320fbf4fede92808ccfe3fea083",
   "memory.example/voice.md": "45dea65772429952ac48d06765b6e4f3c22922291e5b9d0cbacd495a7e63387d",
-  "references/autopilot.md": "25740224ef390644350eb43c1520a6e4df8d9fbfbbb6283d717b4689b8eff0d4",
+  "references/autopilot.md": "52cf3f71ddfe75e682c0a7799784b41be41d4c3b20c6b9920e89807d73a8a653",
   "references/compliance-common.md": "6e3ae7666e5e9edcd27a82f04d0485fd5e518c8d30b2ce95d857c349d697a766",
   "references/images.md": "e6073713894e3c245a07b152bfbad3eca686095f5083385d2c8f2e2ded63a849",
   "references/memory.md": "41ad8d25adac6c0829a6b38961978e518d1abb6b0aae8a7ff2e33d02e4add68e",
@@ -64,6 +64,6 @@
   "scripts/sync_codex_marketplace.py": "c60dd6d1b33253637aab600e5196966762ba447cc09c804ea049f4a5bec64b0d",
   "tests/fixtures/feeds/holidays-2026-us.json": "c47d3041a8ab0f5dc116e73b53acd400a624b6d91622bc178a8826f42ec45b28",
   "tests/fixtures/feeds/pmms-history-tail.csv": "7d0843a031058a8bab26097583449866bc6a1d77c4ccc1cc47ea1e9ae16a447c",
-  "tests/test_core.py": "cca81fb154aa6515b992303a0a02471845b2065e5f810844bad78d3628a51ef5"
+  "tests/test_core.py": "087d77be00c0c83bdbad92dd901c118b5c5222785c6333e8e1656e44e19bb739"
  }
 }

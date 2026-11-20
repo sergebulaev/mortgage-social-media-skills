@@ -142,23 +142,32 @@ def check(text: str, *, profile: Optional[dict] = None, rules: Optional[list] = 
     for rule in rules:
         if not _applies(rule, state, language, platform):
             continue
-        trigger = None
         if rule.get("if_any"):
-            trigger = _search(rule["if_any"], norm)
-            if not trigger:
+            matches = [m for p in rule["if_any"] for m in re.finditer(p, norm, re.I | re.M)]
+            if not matches:
                 continue
-        # unless_* are looked up in the whole post, or only in the sentence that
-        # triggered when the rule says "unless_scope": "sentence" (so "Never
-        # give ibuprofen" cannot excuse "Try Benadryl" two sentences later).
-        scope = norm
-        if trigger and rule.get("unless_scope") == "sentence":
-            start = max(norm.rfind(c, 0, trigger.start()) for c in ".!?\n") + 1
-            ends = [i for i in (norm.find(c, trigger.end()) for c in ".!?\n") if i != -1]
-            scope = norm[start:(min(ends) + 1) if ends else len(norm)]
-        if _search(rule.get("unless_any"), scope):
+        else:
+            matches = [None]
+        trigger = None
+        for m in matches:
+            # unless_* are looked up in the whole post, or only in the sentence of
+            # THIS match when the rule says "unless_scope": "sentence" (so "Never
+            # give ibuprofen" cannot excuse "Try Benadryl" two sentences later).
+            scope = norm
+            if m is not None and rule.get("unless_scope") == "sentence":
+                start = max(norm.rfind(c, 0, m.start()) for c in ".!?\n") + 1
+                ends = [k for k in (norm.find(c, m.end()) for c in ".!?\n") if k != -1]
+                scope = norm[start:(min(ends) + 1) if ends else len(norm)]
+            if _search(rule.get("unless_any"), scope):
+                continue
+            if rule.get("unless_all") and all(_search([rx], scope) for rx in rule["unless_all"]):
+                continue
+            trigger = m if m is not None else True
+            break
+        if trigger is None:
             continue
-        if rule.get("unless_all") and all(_search([rx], scope) for rx in rule["unless_all"]):
-            continue
+        if trigger is True:
+            trigger = None
         missing = []
         fixable = False
         if rule["level"] == "fix" and rule.get("append"):

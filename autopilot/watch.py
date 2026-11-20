@@ -142,7 +142,9 @@ def main() -> int:
     voice = (ROOT / config["voice_file"]).read_text(encoding="utf-8") if config.get("voice_file") else ""
 
     try:
-        events = trigger.events(config, fixtures=args.fixtures, today=today)
+        # The trigger gets a date only when one was forced (tests); otherwise it
+        # decides "today" itself (report days, local time zones differ by source).
+        events = trigger.events(config, fixtures=args.fixtures, today=args.today or "")
     except Exception as exc:  # a dead feed must not look like a quiet day
         summary(f"Source check failed: {exc}. Nothing drafted. Use the manual path in references/sources.md.")
         return 3
@@ -166,12 +168,13 @@ def main() -> int:
             summary(f"Daily limit of {limit} drafts reached; {eid} waits for tomorrow.")
             break
         try:
-            text = (from_model(event, profile, voice, rules_digest(rules, profile.get("state", "")), language, platforms)
-                    if use_llm else from_template(event, templates, profile, language))
+            lang = event.get("language", language)  # an event may carry its own language (EN/ES bundles)
+            text = (from_model(event, profile, voice, rules_digest(rules, profile.get("state", "")), lang, platforms)
+                    if use_llm else from_template(event, templates, profile, lang))
         except Exception as exc:
             summary(f"- {eid}: could not write ({exc}); skipped.")
             continue
-        report = compliance.autofix(text, profile=profile, rules=rules, language=language)
+        report = compliance.autofix(text, profile=profile, rules=rules, language=event.get("language", language))
         text = report.text
         bad_numbers = provenance.unsupported_numbers(text, [event["data"], profile])
         # A vertical may add its own check (e.g. recall posts naming no brand the

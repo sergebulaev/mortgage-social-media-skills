@@ -65,9 +65,11 @@ class ComplianceEngine(unittest.TestCase):
         self.assertEqual(rep.verdict, "FAIL")
 
     def test_autofix_never_touches_block(self):
-        rep = compliance.autofix("Leave a 5 star review, get 10% off", rules=self.rules)
+        text = "Leave a 5 star review, get 10% off"
+        rep = compliance.autofix(text, rules=self.rules)
         self.assertEqual(rep.verdict, "FAIL")
-        self.assertEqual(rep.applied, [])
+        self.assertTrue(rep.text.startswith(text), "the blocked passage must be left for the writer to rewrite")
+        self.assertIn("FTC-REVIEW-INCENTIVE", [f.rule_id for f in rep.findings])
 
 
 class Provenance(unittest.TestCase):

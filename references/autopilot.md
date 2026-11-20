@@ -60,6 +60,17 @@ cents) and one card ($0.02). GitHub Actions minutes for a public fork are free;
 a private fork uses the account's included minutes (a run takes under a
 minute). Publora drafts count toward nothing until scheduled.
 
+## GitHub limits to know
+
+- **Scheduled workflows stop after 60 days without activity** in a public
+  repo. The autopilot commits `autopilot/state.json` only when it drafts, so a
+  quiet season can switch it off silently. Once a month, open the Actions tab
+  (GitHub shows a banner to re-enable it) or push any small commit.
+- **Minutes:** a public fork runs free. A private copy bills each run as at
+  least one minute: a 30-minute schedule is about 1,440 minutes a month,
+  against 2,000 free minutes on GitHub Free. Use a slower cron if you share
+  those minutes with other work.
+
 ## Troubleshooting
 
 | Summary line | Meaning |
