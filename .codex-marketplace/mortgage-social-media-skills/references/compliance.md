@@ -83,7 +83,7 @@ figure, so the label can never satisfy the APR rule for an offer. Never round th
 | Id | Level | Rule |
 |---|---|---|
 | NMLS-ID | fix | Every post carries the loan officer's name and NMLS ID and the company's name and NMLS ID (the check needs both numbers) |
-| EQUAL-HOUSING | fix | Every post carries the Equal Housing statement the company uses |
+| EQUAL-HOUSING | fix | Every post carries the Equal Housing line: `eho_statement` from the profile ("Equal Housing Lender" for a lender that prints it), or "Equal Housing Opportunity" when it is empty. Not required when the profile says `equal_housing_line: off` |
 
 NMLS: state rules require the originator's unique identifier on advertising;
 Texas spells it out for social media (Texas SML, "RMLO Social Media
@@ -95,9 +95,12 @@ every post as the safe default. Line format, from the profile:
 Equal Housing: a legal requirement for some lenders (FDIC-supervised banks
 use "Equal Housing Lender", 12 CFR 338.3) and the policy of most others. As a
 federal rule for every non-bank originator it is **not verified** (federal
-credit unions: 12 CFR 701.31); the bundle
-adds it by default and the owner may remove it on their compliance team's
-written instruction.
+credit unions: 12 CFR 701.31); the bundle adds it by default (owner's decision
+of 2026-11-23), even when the profile has no `eho_statement`: then the line
+reads "Equal Housing Opportunity". A lender that prints "Equal Housing
+Lender" puts that in `eho_statement`. To switch the line off, add
+`- equal_housing_line: off` to `profile.md` (also accepted: no, false, none),
+only on your compliance team's written instruction.
 
 ## Misleading claims (Reg N / MAP Rule)
 

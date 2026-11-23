@@ -95,7 +95,7 @@ per account a month.
 ## Rules it checks
 
 - Reg Z advertising rules (12 CFR 1026.24): trigger terms, APR with any rate offer.
-- NMLS ID of the loan officer and the company; the Equal Housing line.
+- NMLS ID of the loan officer and the company; the Equal Housing line on every post by default ("Equal Housing Opportunity" unless your profile says otherwise; `equal_housing_line: off` switches it off).
 - Reg N / MAP Rule (12 CFR 1014): no guaranteed approval, no implied government affiliation.
 - RESPA §8 for realtor co-marketing; fair lending wording.
 - FTC reviews and endorsements rules for testimonials; no invented numbers.

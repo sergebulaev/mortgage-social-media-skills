@@ -83,6 +83,38 @@ class SurveyPost(unittest.TestCase):
         self.assertEqual(compliance.autofix(self.TEXT, profile=thin).verdict, "FAIL")
 
 
+class EqualHousingDefault(unittest.TestCase):
+    """Decision of 2026-11-23: the Equal Housing line is on by default, even
+    with no eho_statement in the profile; equal_housing_line: off removes it."""
+    TEXT = "Freddie Mac's survey: the 30-year fixed averaged 7.28% this week, up from 7.11%."
+
+    def test_default_text_without_eho_statement(self):
+        thin = {k: v for k, v in PROFILE.items() if k != "eho_statement"}
+        rep = compliance.autofix(self.TEXT, profile=thin)
+        self.assertEqual(rep.verdict, "PASS", rep.summary())
+        self.assertTrue(rep.text.endswith("Equal Housing Opportunity"), rep.text)
+        self.assertEqual(rep.text.count("Equal Housing"), 1)
+
+    def test_lender_statement_from_profile(self):
+        lender = {**PROFILE, "eho_statement": "Equal Housing Lender"}
+        rep = compliance.autofix(self.TEXT, profile=lender)
+        self.assertEqual(rep.verdict, "PASS", rep.summary())
+        self.assertTrue(rep.text.endswith("Equal Housing Lender"), rep.text)
+        self.assertNotIn("Equal Housing Opportunity", rep.text)
+
+    def test_off_switch(self):
+        for off in ("off", "OFF", "no"):
+            rep = compliance.autofix(self.TEXT, profile={**PROFILE, "equal_housing_line": off})
+            self.assertNotIn("Equal Housing", rep.text, off)
+            self.assertNotIn("EQUAL-HOUSING", ids(rep), off)
+            self.assertEqual(rep.verdict, "PASS", rep.summary())
+
+    def test_autopilot_default_three_drafts(self):
+        import json
+        cfg = json.loads((ROOT / "autopilot" / "config.example.json").read_text(encoding="utf-8"))
+        self.assertEqual(cfg["max_drafts_per_day"], 3)
+
+
 class Claims(unittest.TestCase):
     def test_guarantee_blocked(self):
         rep = compliance.autofix("We guarantee your approval, no credit check!", profile=PROFILE)

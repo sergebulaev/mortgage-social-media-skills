@@ -22,7 +22,8 @@ A rule:
 Levels:
 - block: the post must be rewritten; nothing may go out with it.
 - fix:   a required element is missing. `autofix` appends `append` when every
-         {placeholder} is filled from the profile, else it stays a failure.
+         {placeholder} is filled from the profile, else it stays a failure;
+         {placeholder|default text} falls back to the default text.
 - flag:  a human must look (Fair Housing words, a minor in a photo...).
 
 Verdict: FAIL if any block or fix finding remains, REVIEW if only flags,
@@ -130,10 +131,23 @@ def _search(patterns: Iterable[str], text: str):
 
 
 def _fill(template: str, profile: dict) -> tuple[str, list]:
-    missing = [k for k in re.findall(r"\{(\w+)\}", template) if not str(profile.get(k, "")).strip()]
-    if missing:
-        return "", missing
-    return template.format(**{k: str(v).strip() for k, v in profile.items()}), []
+    """Fill {field} and {field|default} from the profile. A {field} with no
+    value is missing (the fix stays a failure); {field|default} uses the
+    default text when the profile has no value."""
+    missing = []
+
+    def sub(m):
+        key, default = m.group(1), m.group(2)
+        val = str(profile.get(key, "")).strip()
+        if val:
+            return val
+        if default is not None:
+            return default
+        missing.append(key)
+        return ""
+
+    out = re.sub(r"\{(\w+)(?:\|([^{}]*))?\}", sub, template)
+    return ("", missing) if missing else (out, [])
 
 
 def check(text: str, *, profile: Optional[dict] = None, rules: Optional[list] = None,

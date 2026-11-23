@@ -1,5 +1,5 @@
 {
- "core_commit": "70c0e20",
+ "core_commit": "3f1fc1e",
  "vertical": "mortgage",
  "note": "Written by vertical-skills-core/generator. Shared and generated files are listed with their hashes; do not edit them here.",
  "files": {
@@ -26,7 +26,7 @@
   "lib/_env.py": "3ef985cdad2a0149c6f9d86c9aab0f9b213e35dd97579f2f31b5f5122639a0ba",
   "lib/_http.py": "f12904c4213943d196784a6ad4c3ef6836ef6a1ab7d585f3e48e10a575e5ab74",
   "lib/cards.py": "28c11e89295b49a9d201fe4bc1b2d53482b65e94aaacde0f720e1aa6383070ab",
-  "lib/compliance.py": "a0bbe9b6f4b6287ec1aa9075d0e2527a0f82553a4d0edc800b4dc9b8b12ac0a0",
+  "lib/compliance.py": "eda6fa219cf41bddaca6716a5f22d3c14c1738ac6cfb32d61d7b39ca77e9912e",
   "lib/feeds/__init__.py": "bb8535126c8b5740c78d403046abaf833589d2e3d56296e4a22f6a930a001363",
   "lib/feeds/holidays.py": "d00334186111d1ae47e06a1076275e683baf6ba112b265e070df1fd99d7a89a1",
   "lib/feeds/pmms.py": "7611a01aec0b87729c84bd7c645a7bab428c6fb67544318956d12dc2b2958f85",
@@ -64,6 +64,6 @@
   "scripts/sync_codex_marketplace.py": "c60dd6d1b33253637aab600e5196966762ba447cc09c804ea049f4a5bec64b0d",
   "tests/fixtures/feeds/holidays-2026-us.json": "c47d3041a8ab0f5dc116e73b53acd400a624b6d91622bc178a8826f42ec45b28",
   "tests/fixtures/feeds/pmms-history-tail.csv": "7d0843a031058a8bab26097583449866bc6a1d77c4ccc1cc47ea1e9ae16a447c",
-  "tests/test_core.py": "f755f964b0a280ef64a2af8697f838a772bd92c8c498caec1650f8ebe9d610cc"
+  "tests/test_core.py": "6bfcfc39ec09aa22edf6666f26fb7d5ed312c31922b7b6a174ff5f2ca44c35eb"
  }
 }

@@ -62,8 +62,8 @@ learned: ...
 ## Steps
 
 1. **Memory.** Print the path. The profile must have `owner_name`, `nmls_id`,
-   `company_name`, `company_nmls_id`, `eho_statement`; if any is missing, ask
-   for it before drafting: without them no rate post can pass the check.
+   `company_name`, `company_nmls_id`; if any is missing, ask for it before
+   drafting: without them no rate post can pass the check.
 2. **Fetch.** `https://www.freddiemac.com/pmms/docs/PMMS_history.csv` (with
    Python: `lib.feeds.pmms.latest(lib.feeds.pmms.parse(lib.feeds.pmms.fetch()))`).
    Check the newest row's date: if it is not this week (Thursday, or
@@ -99,6 +99,10 @@ learned: ...
 
    <eho_statement>
    ```
+
+   The last line is the profile's `eho_statement`, or "Equal Housing
+   Opportunity" when it is empty; leave it out only when the profile says
+   `equal_housing_line: off` (then EQUAL-HOUSING does not fire).
  Any trigger-term finding means the
    post drifted into an offer: rewrite it as news. Show the result.
 6. **Numbers.** Every number in every post is one of: this week's 30-year and

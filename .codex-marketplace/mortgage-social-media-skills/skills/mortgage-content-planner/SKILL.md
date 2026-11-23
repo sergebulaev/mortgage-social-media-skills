@@ -77,7 +77,7 @@ One message, numbered, skippable questions:
 
 1. Your name as licensed, your NMLS ID, your company's name and NMLS ID.
 2. States you are licensed in; the city and ZIP codes you mostly lend in.
-3. Equal Housing Opportunity or Equal Housing Lender (what your company prints).
+3. Equal Housing Opportunity or Equal Housing Lender (what your company prints; without an answer posts end with "Equal Housing Opportunity").
 4. Does your company require compliance approval before you post? (yes/no)
 5. Networks you use (Facebook, Instagram, LinkedIn...) and how often you want to post.
 6. Who you want to reach: first-time buyers, move-up buyers, veterans, investors, realtor partners.

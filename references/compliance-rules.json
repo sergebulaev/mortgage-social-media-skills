@@ -117,10 +117,19 @@
         "equal housing (opportunity|lender)",
         "igualdad de oportunidades (en|de) vivienda"
       ],
-      "append": "{eho_statement}",
-      "message": "Mortgage ads carry the Equal Housing statement your company uses. It is a legal requirement for some lenders (FDIC-supervised banks: 'Equal Housing Lender') and a policy of most others; this bundle adds it to every post as a conservative default. Remove it only on your compliance team's written say-so.",
+      "append": "{eho_statement|Equal Housing Opportunity}",
+      "message": "Mortgage ads carry the Equal Housing statement your company uses: the profile's eho_statement (a lender that prints 'Equal Housing Lender' puts that there), or 'Equal Housing Opportunity' when it is empty. It is a legal requirement for some lenders (FDIC-supervised banks: 'Equal Housing Lender') and a policy of most others; this bundle adds it to every post by default. To switch it off, set equal_housing_line: off in profile.md, only on your compliance team's written say-so.",
       "source": "12 CFR 338.3 (FDIC-supervised lenders); 12 CFR 701.31 (federal credit unions); HUD Equal Housing Opportunity logo guidance; lender and investor policy (not verified as a federal rule for every originator)",
-      "checked": "2026-11-19"
+      "checked": "2026-11-19",
+      "unless_profile": {
+        "equal_housing_line": [
+          "off",
+          "no",
+          "false",
+          "none",
+          "0"
+        ]
+      }
     },
     {
       "id": "MAP-GUARANTEE",

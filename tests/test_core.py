@@ -74,6 +74,18 @@ class ComplianceEngine(unittest.TestCase):
         self.assertEqual(compliance.check("Soup $11", rules=[rule], profile={"service_charge": "None"}).verdict, "PASS")
         self.assertEqual(compliance.check("Soup $11", rules=[rule], profile={"service_charge": "18%"}).verdict, "REVIEW")
 
+    def test_append_default(self):
+        rule = {"id": "X-EHO", "level": "fix", "title": "t", "message": "m", "source": "s",
+                "if_any": ["home"], "unless_any": ["Equal Housing"],
+                "append": "{eho_statement|Equal Housing Opportunity}"}
+        rep = compliance.autofix("A home for sale.", rules=[rule], profile={})
+        self.assertEqual(rep.verdict, "PASS")
+        self.assertIn("Equal Housing Opportunity", rep.text)
+        rep = compliance.autofix("A home for sale.", rules=[rule], profile={"eho_statement": "Equal Housing Lender"})
+        self.assertIn("Equal Housing Lender", rep.text)
+        rule2 = dict(rule, append="NMLS {nmls_id}")
+        self.assertEqual(compliance.autofix("A home.", rules=[rule2], profile={}).verdict, "FAIL")
+
     def test_placeholder_blocked(self):
         self.assertEqual(compliance.check("Call us at [phone] today", rules=self.rules).verdict, "FAIL")
 

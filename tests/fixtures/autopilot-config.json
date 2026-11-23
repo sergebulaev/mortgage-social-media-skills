@@ -3,7 +3,7 @@
   "repo": "mortgage-social-media-skills",
   "language": "en",
   "mode": "no-llm",
-  "max_drafts_per_day": 2,
+  "max_drafts_per_day": 3,
   "cards": false,
   "platforms": ["facebook-90000000001", "linkedin-90000000003", "instagram-90000000002"],
   "profile": {
