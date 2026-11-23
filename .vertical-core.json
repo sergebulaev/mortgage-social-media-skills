@@ -1,5 +1,5 @@
 {
- "core_commit": "3f1fc1e",
+ "core_commit": "c24a423",
  "vertical": "mortgage",
  "note": "Written by vertical-skills-core/generator. Shared and generated files are listed with their hashes; do not edit them here.",
  "files": {
@@ -45,7 +45,7 @@
   "memory.example/facts.md": "5830a252fc2f43cca3f81acab9d6f8f24d0bc4bdfe64b5b1b886c7392bc9097a",
   "memory.example/ideas.md": "9c5966140c47533a3c478fba7c8c3124917f708d9127113c6cfc0e2eebdcfd2c",
   "memory.example/lessons.md": "731ee82505d24d51b6dedd412fd921d999266ce89f1f56ba4097284a511f35b0",
-  "memory.example/profile.md": "64acb2ca65dbf828ea46dce0e35b98331c2df8b0f3599fa1e2ece07d3ba6ee9e",
+  "memory.example/profile.md": "02caf9433d3d286102bed537e356ba4b99c7546d5ccaad9b6ad0c812933bb572",
   "memory.example/rules.md": "ead4609845b78fd8a716a0394584820e977a7320fbf4fede92808ccfe3fea083",
   "memory.example/voice.md": "45dea65772429952ac48d06765b6e4f3c22922291e5b9d0cbacd495a7e63387d",
   "references/autopilot.md": "52cf3f71ddfe75e682c0a7799784b41be41d4c3b20c6b9920e89807d73a8a653",

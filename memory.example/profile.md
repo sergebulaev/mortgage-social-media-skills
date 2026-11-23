@@ -19,6 +19,7 @@ One business. Fill what you know; `[confirm]` where unsure.
 - company_name: [company name exactly as licensed]
 - company_nmls_id: [company NMLS ID]
 - licensed_states: [states you are licensed in, e.g. TX, OK]
-- eho_statement: [Equal Housing Opportunity or Equal Housing Lender, as your company uses]
+- eho_statement: [Equal Housing Opportunity or Equal Housing Lender, as your company uses; empty means Equal Housing Opportunity]
+- equal_housing_line: [on by default; off only on your broker's or compliance team's written say-so]
 - apr_disclosure: [optional: a rate/APR/terms example your compliance team approved, used only if a post states your own rate or payment]
 - compliance_review: [yes if your company requires compliance approval before posting]
