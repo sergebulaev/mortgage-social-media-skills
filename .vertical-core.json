@@ -1,10 +1,10 @@
 {
- "core_commit": "c24a423",
+ "core_commit": "954fdb6",
  "vertical": "mortgage",
  "note": "Written by vertical-skills-core/generator. Shared and generated files are listed with their hashes; do not edit them here.",
  "files": {
   ".agents/plugins/marketplace.json": "cb576776344f601b13f360bcf2862abe16f50deb095413013ecd7b1966f3a722",
-  ".claude-plugin/marketplace.json": "50ed57851f21c9ea0023406e8baadcbdde56ec33ce38fb5cce72bd483d379bf9",
+  ".claude-plugin/marketplace.json": "9cecd0bd509081da212b1c3b5f5d9bc416cf7d45688f11c2afae038c2bfc7d68",
   ".claude-plugin/plugin.json": "269f4c289f662c77d6521498715d6be7bd66b9c34accc1ad131136ec3c1c3602",
   ".codex-plugin/plugin.json": "68eaa678a73b3935de0105e0de94347e0ad3adf261d28180ea21da915f9032f9",
   ".codexignore": "ceee04d122e062f1d83815397faedccbda792c44cf2ae84eb60092edbcc7fa2a",

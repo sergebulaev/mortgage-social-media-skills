@@ -5,7 +5,7 @@
     "url": "https://github.com/sergebulaev"
   },
   "metadata": {
-    "description": "Claude skills for mortgage loan officer social media: Thursday rate posts from Freddie Mac PMMS, Reg Z and NMLS check, images and scheduling. Claude Code, Codex, Claude."
+    "description": "Claude skills for mortgage broker social media and loan officer marketing: weekly rate posts from the Freddie Mac survey, Reg Z, NMLS and Equal Housing check, rate cards, drafts in Publora, 100+ post ideas. Claude Code, Codex, Claude."
   },
   "plugins": [
     {
