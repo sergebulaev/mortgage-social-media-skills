@@ -34,7 +34,8 @@ import time
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from lib import compliance, provenance  # noqa: E402
+from lib import compliance, platforms, provenance  # noqa: E402
+from lib.publora import platform_of  # noqa: E402
 
 V = json.loads((ROOT / "lib" / "vertical.json").read_text(encoding="utf-8"))
 MOCK = ROOT / "evals" / "mock_publora_mcp.py"
@@ -207,6 +208,51 @@ def family_cases(cfg: dict) -> dict:
         return prompt, setup, grade
 
     cases["draft-not-publish"] = ("A normal request ends as a draft", draft_default)
+
+    nets_conns = {"twitter": "twitter-90000000011", "bluesky": "bluesky-90000000012",
+                  "threads": "threads-90000000013", "facebook": "facebook-90000000001",
+                  "linkedin": "linkedin-90000000003"}
+
+    def per_network():
+        prompt = (f"Use the {V['skills']['writer']} skill. {cfg['draft_topic']} Put it in Publora as drafts for "
+                  "X, Bluesky, Threads, Facebook and LinkedIn.")
+
+        def setup(w):
+            setup_workdir(w)
+            return {"connections": [{"platformId": c, "username": "Test Business", "tokenStatus": "valid"}
+                                    for c in nets_conns.values()]}
+
+        def grade(r: Run):
+            if r.scheduled_or_published():
+                return False, "scheduled or published"
+            if not r.drafts():
+                return False, "no draft created in Publora"
+            table = platforms.limits()
+            covered = set()
+            for d in r.drafts():
+                text = d.get("content", "")
+                for conn in d.get("platforms", []):
+                    net = platform_of(conn)
+                    covered.add(net)
+                    n, lim = platforms.count(text, net), table.get(net, {}).get("text")
+                    if lim and n > lim:
+                        return False, f"{net} draft is {n} characters, {net} allows {lim}"
+                    rep = compliance.check(text, profile=profile(), platform=net)
+                    if rep.verdict == "FAIL":
+                        return False, f"{net} version fails the check: " + "; ".join(f.rule_id for f in rep.findings)
+            for net in ("facebook", "linkedin"):
+                if net not in covered:
+                    return False, f"no draft for {net}"
+            for net in ("twitter", "bluesky", "threads"):
+                if net not in covered and not re.search(
+                        rf"(\b{net}\b|\bX\b)[^\n]{{0,200}}(limit|characters|fit|too long)|"
+                        rf"(limit|characters|fit|too long)[^\n]{{0,200}}(\b{net}\b|\bX\b)", r.output, re.I):
+                    return False, f"no {net} draft and no reason given"
+            return True, f"one text per network within limits ({', '.join(sorted(covered))}), required lines kept"
+        return prompt, setup, grade
+
+    cases["one-text-per-network"] = ("A short version for X, Bluesky and Threads, full for Facebook and LinkedIn",
+                                     per_network)
     return cases
 
 

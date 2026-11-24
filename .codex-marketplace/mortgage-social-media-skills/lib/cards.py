@@ -3,7 +3,7 @@
 A card spec is a plain dict with a `kind`:
 
     {"kind": "stat", "value": "6.84%", "label": "30-year fixed, week of Nov 19",
-     "source": "Freddie Mac PMMS"}
+     "delta": "+0.17 from last week", "context": "A year ago: 6.26%", "source": "Freddie Mac PMMS"}
     {"kind": "table", "title": "...", "rows": [["EB-2 India", "01JAN13", "15FEB13"]],
      "header": ["Category", "November", "December"], "source": "..."}
     {"kind": "checklist", "title": "After the hail", "items": ["...", "..."]}
@@ -11,10 +11,13 @@ A card spec is a plain dict with a `kind`:
      "where": "412 Elm St", "cta": "Stop by"}
     {"kind": "quote", "quote": "...", "name": "Pastor Ana"}
 
-The four data templates the design asks for (stat-card, table-card,
-checklist-card, event-card) did not exist in Pixfaro's catalog on 2026-11-19.
-`plan_render` uses a native template when the live catalog lists one and all
-its required slots can be filled, and otherwise falls back: a stat to
+Pixfaro's catalog has a template for every kind (stat-card, table-card,
+checklist-card, event-card, quote-card, post-card; all four data templates
+live since 2026-11-24). `plan_render` fills the native template's slots from
+the spec (`header` -> columns, `when` -> date, `where` -> place, a
+checklist's `source` -> footer, the business name and handle under the card).
+Only when a catalog lacks the template (an older account or a private
+deployment) or a required slot cannot be filled does it fall back: a stat to
 `quote-card` (the figure set large, source inside the text), everything else
 to `post-card` (text laid out as lines). The fallback is typeset too, so the
 numbers stay exactly the numbers from the source.
@@ -63,14 +66,35 @@ def as_lines(spec: dict) -> str:
     return "\n".join(line for line in out if line)
 
 
-def _native_slots(spec: dict, template: dict) -> Optional[dict]:
+#: spec key -> slot name, where the template calls a field something else.
+ALIASES = {"table-card": {"header": "columns"},
+           "event-card": {"when": "date", "where": "place", "text": "details"},
+           "checklist-card": {"source": "footer"}}
+
+
+def _native_slots(spec: dict, template: dict, *, business_name: str = "", handle: str = "") -> Optional[dict]:
     """Fill a native template's slots by name; None if a required one is missing."""
     slots: dict[str, Any] = {}
     flat = {k: v for k, v in spec.items() if k != "kind"}
     if "items" in flat:
-        flat["items"] = "\n".join(flat["items"])
+        flat["items"] = "\n".join(map(str, flat["items"]))
     if "rows" in flat:
-        flat["rows"] = "\n".join(" | ".join(map(str, r)) for r in flat["rows"])
+        flat["rows"] = "\n".join("|".join(map(str, r)) for r in flat["rows"])
+    if "header" in flat and isinstance(flat["header"], (list, tuple)):
+        flat["header"] = "|".join(map(str, flat["header"]))
+    for key, slot in ALIASES.get(template.get("id"), {}).items():
+        if key in flat and slot not in flat:
+            flat[slot] = flat.pop(key)
+    if template.get("id") == "checklist-card" and flat.get("footer") and ":" not in str(flat["footer"])[:30]:
+        flat["footer"] = f"Source: {flat['footer']}"
+    delta = str(flat.get("delta", "")).strip()
+    if delta and "delta_direction" not in flat:
+        flat["delta_direction"] = ("up" if delta[0] in "+▲" else "down" if delta[0] in "-−▼"
+                                   else "flat" if delta.startswith(("0 ", "0.00", "unchanged")) else "")
+    if business_name and "name" not in flat:
+        flat["name"] = business_name
+    if handle and "handle" not in flat:
+        flat["handle"] = handle
     for slot in template.get("slots", []):
         name = slot.get("name")
         if name in flat and flat[name] not in (None, ""):
@@ -90,7 +114,8 @@ def plan_render(spec: dict, catalog: list[dict], *, business_name: str, handle: 
     kind = spec.get("kind", "post")
     native = NATIVE.get(kind)
     if native in by_id and kind not in ("quote", "post"):
-        slots = _native_slots(spec, by_id[native])
+        slots = _native_slots(spec, by_id[native], business_name=_clip(business_name or '', NAME_MAX),
+                              handle=handle)
         if slots:
             return {"template": native, "slots": slots, "size": size, "fallback": False}
     name = _clip(business_name or "", NAME_MAX)

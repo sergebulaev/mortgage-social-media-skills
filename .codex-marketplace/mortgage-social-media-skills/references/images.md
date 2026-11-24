@@ -37,12 +37,14 @@ With a Pixfaro key (`PIXFARO_KEY`) or the Pixfaro connector:
 
 1. Read the live template list (`GET https://api.pixfaro.com/v1/templates`,
    public, free, or the connector's `list_templates`).
-2. If a template for the kind exists (`stat-card`, `table-card`,
-   `checklist-card`, `event-card`) and its required slots can be filled, use
-   it. Otherwise fall back: a stat goes on `quote-card` (the figure set large,
-   the source inside the text, because that template does not print a name
-   line), a quote on `quote-card`, everything else on `post-card` as lines.
-   `lib/cards.py` does exactly this: `cards.render(spec, business_name=...)`.
+2. Use the template for the kind: `stat-card` (value, label, the change as
+   `delta` like "▲ 0.17 from last week", one `context` line, the source),
+   `table-card`, `checklist-card` (the source as its footer), `event-card`
+   (date, place, call to action), `quote-card`. The business name goes under
+   the card. `lib/cards.py` fills the slots: `cards.render(spec,
+   business_name=...)`. Only if a template is missing from the catalog (an
+   older account) does it fall back to `quote-card` for a stat and
+   `post-card` for the rest, still typeset.
 3. Text past a slot's maximum is refused by Pixfaro, not cut: shorten first.
 4. The result is a hosted https URL. It goes straight into the Publora draft
    as `mediaUrls`; the owner sees one draft with the picture on it.

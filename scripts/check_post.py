@@ -10,6 +10,11 @@
 - numbers: every number must appear in --source (feed data the skill fetched,
   any number of files) or in the business memory (`lib/provenance.py`).
 - voice: enumerated AI tells and the platform length (`lib/style.py`).
+- length: with --platform and --fix, a text over that network's limit is cut
+  to a version that fits (`lib/platforms.py`: opening line, link lines and
+  every required line kept); if the required lines alone do not fit, the
+  verdict is FAIL and there is no draft for that network. Run it once per
+  network you post to: X 280, Bluesky 300, Threads and Mastodon 500.
 
 Exit code: 0 PASS, 1 FAIL, 2 REVIEW (flags a human must look at). The exit
 code does not change with who asks or how urgent it is.
@@ -26,7 +31,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from lib import compliance, memory, provenance, style  # noqa: E402
+from lib import compliance, memory, platforms, provenance, style  # noqa: E402
 
 
 CONSENT_LINE = re.compile(r"(shared |posted )?with (their|his|her|the (patient|client|owner|member|family)'?s?) "
@@ -56,6 +61,16 @@ def consent_problem(text: str, memory_root, platform: str) -> str:
 
 def run(text: str, *, profile: dict, sources: list, platform: str = "", language: str = "",
         fix: bool = False, memory_root=None) -> dict:
+    fit_note = ""
+    if fix and platform:
+        fitted, fit_note = platforms.fit(
+            text, platform.lower(), finish=lambda t: compliance.autofix(
+                t, profile=profile, platform=platform, language=language).text)
+        if fitted is not None:
+            fit_note = ""
+            if fitted != compliance.autofix(text, profile=profile, platform=platform, language=language).text:
+                text = fitted
+                fit_note = f"shortened to fit {platform}"
     report = (compliance.autofix if fix else compliance.check)(
         text, profile=profile, platform=platform, language=language)
     final = report.text
@@ -67,7 +82,10 @@ def run(text: str, *, profile: dict, sources: list, platform: str = "", language
         verdict = "REVIEW"
     if numbers or not voice["ok"]:
         verdict = "FAIL"
+    if fit_note and not fit_note.startswith("shortened"):
+        verdict = "FAIL"  # the required lines do not fit this network
     return {"verdict": verdict, "text": final, "compliance": report.summary(), "consent": consent,
+            "length": fit_note,
             "compliance_verdict": report.verdict, "applied": report.applied,
             "unsupported_numbers": numbers, "voice": voice}
 
@@ -104,6 +122,8 @@ def main() -> int:
         print(out["compliance"])
         if out["consent"]:
             print("Consent: " + out["consent"])
+        if out["length"]:
+            print("Length: " + out["length"])
         if out["unsupported_numbers"]:
             print("Numbers with no source: " + ", ".join(out["unsupported_numbers"]))
         for f in out["voice"]["strict"]:
@@ -111,7 +131,7 @@ def main() -> int:
         for f in out["voice"]["soft"]:
             print(f"Voice (soft): {f['code']}: {f['why']}")
         print(f"VERDICT: {out['verdict']}")
-        if args.fix and out["applied"]:
+        if args.fix and (out["applied"] or out["length"].startswith("shortened")):
             print("\n--- fixed text ---\n" + out["text"])
     return {"PASS": 0, "FAIL": 1, "REVIEW": 2}[out["verdict"]]
 

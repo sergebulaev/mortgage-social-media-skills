@@ -188,3 +188,21 @@ class Trigger(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class RateCard(unittest.TestCase):
+    """The stat card carries the week's change and a context line (live run 2026-11-24:
+    the card showed no change)."""
+
+    def test_card_has_delta_and_context(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("trigger", ROOT / "autopilot" / "trigger.py")
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        ev = mod.events({}, fixtures=ROOT / "tests" / "fixtures" / "feeds", today="2026-11-20")[0]
+        card = ev["card"]
+        self.assertEqual(card["delta"], "▲ 0.17 from last week")
+        self.assertIn("15-year: 6.66%", card["context"])
+        self.assertEqual(mod._delta("-0.05"), "▼ 0.05 from last week")
+        self.assertEqual(mod._delta("0.00"), "unchanged from last week")
+        self.assertEqual(provenance.unsupported_numbers(card["delta"] + " " + card["context"], [ev["data"]]), [])

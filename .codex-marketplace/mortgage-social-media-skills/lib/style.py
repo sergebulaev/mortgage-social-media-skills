@@ -2,7 +2,7 @@
 enumerated rule holds under pressure, a vague caveat does not).
 
 STRICT findings must be fixed before a draft is shown; SOFT ones are listed.
-Platform length limits come from Publora's platform-limits guide.
+Platform length limits come from Publora's platform-limits (lib/platforms.py).
 """
 from __future__ import annotations
 
@@ -21,8 +21,7 @@ SOFT = [
     ("HASHTAG_PILE", r"(#\w+\s*){6,}", "more than five hashtags in a row"),
     ("EMOJI_PILE", r"([\U0001F300-\U0001FAFF]\s*){4,}", "four or more emoji in a row"),
 ]
-LIMITS = {"twitter": 280, "threads": 500, "bluesky": 300, "mastodon": 500, "linkedin": 3000,
-          "instagram": 2200, "tiktok": 2200, "facebook": 63206, "telegram": 4096, "youtube": 5000}
+from .platforms import LIMITS, count  # noqa: E402  (Publora platform-limits)
 
 
 def lint(text: str, platform: str = "") -> dict:
@@ -34,7 +33,9 @@ def lint(text: str, platform: str = "") -> dict:
         if re.search(rx, text, re.I | re.M):
             soft.append({"code": code, "why": why})
     limit = LIMITS.get(platform)
-    if limit and len(text) > limit and platform not in ("twitter", "threads"):
-        strict.append({"code": "TOO_LONG", "match": f"{len(text)} chars",
+    # Every network's limit is hard, X and Threads included: Publora takes a
+    # long draft, but publishing it to X fails (live run 2026-11-24).
+    if limit and count(text, platform) > limit:
+        strict.append({"code": "TOO_LONG", "match": f"{count(text, platform)} chars",
                        "why": f"{platform} allows {limit} characters"})
     return {"strict": strict, "soft": soft, "ok": not strict}

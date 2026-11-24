@@ -43,7 +43,10 @@ user for a key in chat; point to `.env` (from `.env.example`).
 Connector: `list_connections` -> copy `platformId` verbatim ->
 `create_post({content, platforms: [ids], mediaUrls?: [https url], platformSettings?})`
 with no `scheduledTime` and no `publishNow` (that is a draft). Pass an
-`idempotencyKey` when a retry is possible.
+`idempotencyKey` when a retry is possible, and make it from the event AND the
+body (`publora.draft_key`): a key from the event alone is refused with 422
+IDEMPOTENCY_KEY_CONFLICT once the body changes (a deleted draft redone with a
+card), and stays refused.
 
 REST: `POST https://api.publora.com/api/v1/create-post`, header
 `x-publora-key`, body `{content, platforms: ["facebook-123"], mediaUrls?, platformSettings?}`,
@@ -54,8 +57,18 @@ plus `Idempotency-Key`. `platforms` is an array of STRINGS. Python:
 
 - Instagram, TikTok, YouTube need media: without an image the draft is fine,
   but say scheduling will be refused until media is attached.
-- X and Threads: a long text is split into a numbered thread by Publora at
-  sentence boundaries; keep the first part strong on its own.
+- **One text per network, each within its limit.** X 280 (a link counts 23),
+  Bluesky 300, Threads 500, Mastodon 500, LinkedIn 3,000, Instagram and
+  TikTok 2,200, Telegram 4,096 (1,024 under an image), Facebook 63,206
+  (Publora `GET /platform-limits`, recorded in `lib/platforms.py`). The limit
+  is hard on X and Threads too: Publora accepts a long draft, publishing it
+  fails. Write the full post for Facebook and LinkedIn and a short version
+  for X, Bluesky, Threads and Mastodon, and run `scripts/check_post.py
+  --platform <network> --fix` on every version: the required lines (license,
+  NMLS, Equal Housing, the source link, every line the check appends) stay
+  on each, and the script cuts the body to fit if needed. If the required
+  lines alone do not fit, there is no draft for that network: say which one
+  and why. One draft per text version, with the channels that share it.
 - `aiGenerated: true` goes into `platformSettings` for instagram, tiktok,
   youtube and twitter whenever the image is AI-generated (`images.md`). A
   typeset data card is not AI-generated: no flag.

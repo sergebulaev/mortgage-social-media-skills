@@ -34,6 +34,25 @@ def _direction(change: str) -> str:
     return "unchanged from"
 
 
+def _delta(change: str) -> str:
+    """The stat card's change line: "▲ 0.17 from last week" (empty without a change)."""
+    if not change:
+        return ""
+    v = float(change)
+    if v == 0:
+        return "unchanged from last week"
+    return f"{'▲' if v > 0 else '▼'} {change.lstrip('+-')} from last week"
+
+
+def _context(week: dict) -> str:
+    parts = []
+    if week.get("rate_15"):
+        parts.append(f"15-year: {week['rate_15']}%")
+    if week.get("year_ago_rate_30"):
+        parts.append(f"30-year a year ago: {week['year_ago_rate_30']}%")
+    return ". ".join(parts) + ("." if parts else "")
+
+
 def events(config: dict, fixtures: Path | None = None, today: str = "") -> list[dict]:
     raw = (Path(fixtures) / pmms.FIXTURE).read_bytes() if fixtures else pmms.fetch()
     rows = pmms.parse(raw)
@@ -60,5 +79,6 @@ def events(config: dict, fixtures: Path | None = None, today: str = "") -> list[
                   "no down payment percentages, no 'my rate', no forecast."),
         "card": {"kind": "stat", "value": f"{week['rate_30']}%",
                  "label": f"30-year fixed, Freddie Mac PMMS average, week of {data['week_label']}",
+                 "delta": _delta(week.get("change_30", "")), "context": _context(week),
                  "source": "Freddie Mac PMMS"},
     }]

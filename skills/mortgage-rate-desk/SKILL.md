@@ -109,9 +109,11 @@ learned: ...
    15-year, last week's, their change, the year-ago figures, the week dates,
    from the PMMS rows you fetched. No rounding (7.28 stays 7.28).
 7. **Card.** A stat card: value `<rate_30>%`, label "30-year fixed, Freddie Mac
-   PMMS average, week of <Mon D, YYYY>", source "Freddie Mac PMMS"; optional
-   second card for the 15-year. `lib.cards.render(spec, business_name=...)`
-   picks the template (post-card fallback today). No AI image.
+   PMMS average, week of <Mon D, YYYY>", delta "▲ 0.17 from last week" (▼
+   down, "unchanged from last week"), context "15-year: <rate_15>%. 30-year
+   a year ago: <year_ago_rate_30>%.", source "Freddie Mac PMMS".
+   `lib.cards.render(spec, business_name=...)` puts it on stat-card. No AI
+   image.
 8. **Drafts** in Publora, one per network or one post group for networks
    sharing a text (`../../references/publishing.md`). If
    `compliance_review: yes`, say the drafts wait for compliance approval in

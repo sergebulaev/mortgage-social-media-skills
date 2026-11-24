@@ -5,6 +5,7 @@ Endpoints used (docs.publora.com, read 2026-11-19):
 - PUT  /update-post/<id>     status "scheduled" + scheduledTime => schedule
 - GET  /platform-connections the channels this key can post to
 - GET  /get-post/<id>
+- GET  /platform-limits       characters per network (lib/platforms.py)
 
 Auth header `x-publora-key`. `platforms` is a STRING array of connection ids
 (`["instagram-123"]`). `mediaUrls` takes public https URLs (a Pixfaro card URL
@@ -96,6 +97,31 @@ def check_targets(platforms: list[str], media_urls: Optional[list[str]]) -> list
     return problems
 
 
+def draft_key(repo: str, event_id: str, body: dict) -> str:
+    """Idempotency-Key for a draft: the event AND the request body.
+
+    The same body sent again maps to the same key, so Publora replays the first
+    answer instead of creating a twin. A different body for the same event
+    (the draft was deleted and the run now has a card, or another text
+    version for another network) gets its own key: with the event id alone,
+    Publora answered 422 IDEMPOTENCY_KEY_CONFLICT forever (live run
+    2026-11-24)."""
+    import hashlib
+    import json
+    digest = hashlib.sha256(json.dumps(body, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    return hashlib.sha256(f"{repo}:{event_id}:{digest}".encode()).hexdigest()[:40]
+
+
+def draft_body(content: str, platforms: list[str], media_urls: Optional[list[str]] = None,
+               platform_settings: Optional[dict] = None) -> dict:
+    body: dict[str, Any] = {"content": content, "platforms": list(platforms)}
+    if media_urls:
+        body["mediaUrls"] = list(media_urls)
+    if platform_settings:
+        body["platformSettings"] = platform_settings
+    return body
+
+
 class PubloraClient:
     def __init__(self, api_key: Optional[str] = None, timeout: float = 30.0, client_tag: str = ""):
         load_env()
@@ -129,21 +155,20 @@ class PubloraClient:
     def get_post(self, post_group_id: str) -> dict:
         return self._call("GET", f"/get-post/{post_group_id}")
 
+    def platform_limits(self) -> dict:
+        return self._call("GET", "/platform-limits")
+
     # ---- writes
     def create_draft(self, *, content: str, platforms: list[str], media_urls: Optional[list[str]] = None,
                      platform_settings: Optional[dict] = None, idempotency_key: Optional[str] = None) -> dict:
         """Create a DRAFT. Returns {success, postGroupId, scheduledTime: null}.
 
-        Pass a stable `idempotency_key` (the autopilot uses the event id) so a
-        retried run replays the first response instead of creating a twin."""
+        Pass a stable `idempotency_key` (`draft_key`) so a retried run replays
+        the first response instead of creating a twin."""
         if not content or not content.strip():
             raise PubloraError("content is empty")
         validate_settings(platform_settings)
-        body: dict[str, Any] = {"content": content, "platforms": list(platforms)}
-        if media_urls:
-            body["mediaUrls"] = list(media_urls)
-        if platform_settings:
-            body["platformSettings"] = platform_settings
+        body = draft_body(content, platforms, media_urls, platform_settings)
         return self._call("POST", "/create-post", body, idem=idempotency_key or str(uuid.uuid4()))
 
     def schedule_draft(self, post_group_id: str, scheduled_time_utc: str, *, confirmed: bool) -> dict:

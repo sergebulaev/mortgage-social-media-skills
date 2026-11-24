@@ -17,7 +17,7 @@ from unittest import mock
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from lib import _http, cards, compliance, memory, provenance, publora, style  # noqa: E402
+from lib import _http, cards, compliance, memory, platforms, provenance, publora, style  # noqa: E402
 
 V = json.loads((ROOT / "lib" / "vertical.json").read_text(encoding="utf-8"))
 FIX = ROOT / "tests" / "fixtures"
@@ -128,6 +128,70 @@ class Style(unittest.TestCase):
         self.assertTrue(style.lint("Rates moved again.")["ok"])
 
 
+class Platforms(unittest.TestCase):
+    """One text per network (P1 of the live run, 2026-11-24)."""
+    LONG = ("Big news from the survey this week. " + "A sentence that adds detail and more detail. " * 12
+            + "\n\nSource: https://example.gov/data")
+
+    @staticmethod
+    def footer(t):
+        return t + "\n\nLicense #12345\nEqual Housing Opportunity"
+
+    def test_short_version_keeps_required_lines(self):
+        for net, lim in (("twitter", 280), ("bluesky", 300), ("threads", 500)):
+            out, why = platforms.fit(self.LONG, net, finish=self.footer)
+            self.assertEqual(why, "")
+            self.assertLessEqual(platforms.count(out, net), lim, net)
+            for must in ("Big news", "https://example.gov/data", "License #12345", "Equal Housing Opportunity"):
+                self.assertIn(must, out, net)
+        full, _ = platforms.fit(self.LONG, "facebook", finish=self.footer)
+        self.assertEqual(full, self.footer(self.LONG))
+
+    def test_no_version_when_required_lines_do_not_fit(self):
+        out, why = platforms.fit(self.LONG, "twitter", finish=lambda t: t + "\n" + "R" * 300)
+        self.assertIsNone(out)
+        self.assertIn("allows 280", why)
+
+    def test_prefix_only_and_no_dangling_lead_in(self):
+        text = "First line here.\n\nThe list, largest first:\n- " + "item " * 80 + "\n\nSecond thought."
+        out, _ = platforms.fit(text, "twitter")
+        self.assertEqual(out, "First line here.")
+
+    def test_x_counts_links_as_23(self):
+        t = "x " * 120 + "https://example.com/" + "a" * 100
+        self.assertEqual(platforms.count(t, "twitter"), 240 + 23)
+        self.assertGreater(platforms.count(t, "bluesky"), 300)
+
+    def test_versions_group_and_report(self):
+        groups, skipped = platforms.versions(self.LONG, ["twitter-1", "bluesky-2", "facebook-3", "linkedin-4"],
+                                             finish_for=lambda net: self.footer, platform_of=publora.platform_of)
+        by = {tuple(g["platforms"]) for g in groups}
+        self.assertIn(("facebook-3", "linkedin-4"), by)
+        self.assertEqual(skipped, [])
+        _, skipped = platforms.versions(self.LONG, ["twitter-1"], finish_for=lambda n: (lambda t: t + "\nR" * 300),
+                                        platform_of=publora.platform_of)
+        self.assertTrue(skipped and skipped[0].startswith("twitter-1:"))
+
+    def test_too_long_is_strict_on_x_and_threads(self):
+        self.assertFalse(style.lint("word " * 70, "twitter")["ok"])
+        self.assertFalse(style.lint("word " * 110, "threads")["ok"])
+        self.assertTrue(style.lint("word " * 70, "facebook")["ok"])
+
+    def test_live_limits_override_table(self):
+        class C:
+            def platform_limits(self):
+                return {"platforms": {"twitter": {"characters": {"standard": 250}},
+                                      "telegram": {"characters": {"standard": 4096, "botCaption": 1024}}}}
+        t = platforms.limits(C())
+        self.assertEqual(t["twitter"]["text"], 250)
+        self.assertEqual(platforms.limit_for("telegram", True, t), 1024)
+
+        class Broken:
+            def platform_limits(self):
+                raise RuntimeError("404")
+        self.assertEqual(platforms.limits(Broken())["twitter"]["text"], 280)
+
+
 class Cards(unittest.TestCase):
     CATALOG = [{"id": "post-card", "slots": [{"name": "text", "required": True, "max": 900},
                                              {"name": "name", "required": True, "max": 60}]},
@@ -150,6 +214,37 @@ class Cards(unittest.TestCase):
         plan = cards.plan_render({"kind": "stat", "value": "7.28%", "label": "30-year"}, cat, business_name="A")
         self.assertEqual(plan["template"], "stat-card")
         self.assertFalse(plan["fallback"])
+
+    def test_stat_card_delta_context_name(self):
+        cat = self.CATALOG + [{"id": "stat-card", "slots": [
+            {"name": "value", "required": True, "max": 16}, {"name": "label", "required": True, "max": 80},
+            {"name": "delta", "max": 24}, {"name": "delta_direction", "max": 8}, {"name": "context", "max": 120},
+            {"name": "source", "max": 80}, {"name": "name", "max": 60}]}]
+        plan = cards.plan_render({"kind": "stat", "value": "7.28%", "label": "30-year fixed",
+                                  "delta": "+0.17 from last week", "context": "A year ago: 6.26%",
+                                  "source": "Freddie Mac PMMS"}, cat, business_name="Acme Lending")
+        self.assertEqual(plan["template"], "stat-card")
+        self.assertEqual(plan["slots"]["delta"], "+0.17 from last week")
+        self.assertEqual(plan["slots"]["delta_direction"], "up")
+        self.assertEqual(plan["slots"]["context"], "A year ago: 6.26%")
+        self.assertEqual(plan["slots"]["name"], "Acme Lending")
+
+    def test_aliases_for_table_event_checklist(self):
+        cat = [{"id": "table-card", "slots": [{"name": "title", "required": True}, {"name": "columns", "required": True},
+                                              {"name": "rows", "required": True}]},
+               {"id": "event-card", "slots": [{"name": "title", "required": True}, {"name": "date", "required": True},
+                                              {"name": "place"}, {"name": "cta"}]},
+               {"id": "checklist-card", "slots": [{"name": "title", "required": True},
+                                                  {"name": "items", "required": True}, {"name": "footer"}]}]
+        t = cards.plan_render({"kind": "table", "title": "T", "header": ["A", "B"], "rows": [["1", "2"]]}, cat,
+                              business_name="X")
+        self.assertEqual((t["template"], t["slots"]["columns"], t["slots"]["rows"]), ("table-card", "A|B", "1|2"))
+        e = cards.plan_render({"kind": "event", "title": "Open house", "when": "Sat", "where": "12 Elm"}, cat,
+                              business_name="X")
+        self.assertEqual((e["template"], e["slots"]["date"], e["slots"]["place"]), ("event-card", "Sat", "12 Elm"))
+        c = cards.plan_render({"kind": "checklist", "title": "T", "items": ["a", "b", "c"], "source": "NOAA SPC"},
+                              cat, business_name="X")
+        self.assertEqual((c["template"], c["slots"]["footer"]), ("checklist-card", "Source: NOAA SPC"))
 
     def test_text_fits_slot(self):
         plan = cards.plan_render({"kind": "checklist", "title": "t", "items": ["x" * 300] * 5},
@@ -190,6 +285,13 @@ class PubloraShapes(unittest.TestCase):
         with self.assertRaises(publora.PubloraError):
             self.client.schedule_draft("pg1", "2026-12-01T15:00:00Z", confirmed=False)
         self.assertEqual(self.calls, [])
+
+    def test_draft_key_follows_the_body(self):
+        a = publora.draft_body("text", ["twitter-1"])
+        b = publora.draft_body("text", ["twitter-1"], ["https://x/card.png"])
+        self.assertEqual(publora.draft_key("r", "e1", a), publora.draft_key("r", "e1", dict(a)))
+        self.assertNotEqual(publora.draft_key("r", "e1", a), publora.draft_key("r", "e1", b))
+        self.assertNotEqual(publora.draft_key("r", "e1", a), publora.draft_key("r", "e2", a))
 
     def test_settings_allowlist(self):
         with self.assertRaises(publora.PubloraError):
@@ -259,7 +361,34 @@ class Autopilot(unittest.TestCase):
                                   str(FIX / "feeds"), "--config", str(p), "--state", str(Path(d) / "s.json"),
                                   "--dry-run", "--no-llm", "--today", cfg["test_today"]],
                                  capture_output=True, text=True, env={"PATH": "/usr/bin:/bin"})
-            self.assertLessEqual(out.stdout.count("would draft"), 1, out.stdout)
+            ids = set(re.findall(r"^- (\S+): DRY RUN", out.stdout, re.M))
+            self.assertLessEqual(len(ids), 1, out.stdout)
+
+    def test_one_text_per_network(self):
+        cfg = json.loads((FIX / "autopilot-config.json").read_text())
+        cfg["platforms"] = ["twitter-1", "bluesky-2", "threads-3", "facebook-4", "linkedin-5"]
+        with tempfile.TemporaryDirectory() as d:
+            p = Path(d) / "c.json"
+            p.write_text(json.dumps(cfg))
+            out = subprocess.run([sys.executable, str(ROOT / "autopilot" / "watch.py"), "--fixtures",
+                                  str(FIX / "feeds"), "--config", str(p), "--state", str(Path(d) / "s.json"),
+                                  "--dry-run", "--no-llm", "--today", cfg["test_today"]],
+                                 capture_output=True, text=True, env={"PATH": "/usr/bin:/bin"})
+            self.assertEqual(out.returncode, 0, out.stdout + out.stderr)
+            blocks = re.findall(r"would draft to ([^\n]+?)(?: card [^\n]*)? \((\d+) characters\):\n\n(.*?)(?=\n- \S+: |\Z)",
+                                out.stdout, re.S)
+            self.assertTrue(blocks, out.stdout)
+            limits = platforms.limits()
+            covered = set()
+            for conns, n, text in blocks:
+                for conn in [c.strip() for c in conns.split(",")]:
+                    net = publora.platform_of(conn)
+                    covered.add(conn)
+                    self.assertLessEqual(platforms.count(text.strip(), net), limits[net]["text"], (conn, text))
+                    rep = compliance.check(text.strip(), profile=cfg["profile"], platform=net)
+                    self.assertEqual(rep.verdict, "PASS", (conn, rep.summary()))
+            skipped = re.findall(r"not drafted for (\S+): ", out.stdout)
+            self.assertEqual(covered | {s.rstrip(":") for s in skipped}, set(cfg["platforms"]), out.stdout)
 
 
 class BundleContract(unittest.TestCase):

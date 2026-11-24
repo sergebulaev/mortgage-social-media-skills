@@ -50,10 +50,10 @@ This bundle writes your own organic posts: the weekly rate post, education posts
 ### What the picture looks like
 
 <p align="center">
-  <img src="assets/examples/rate-card.jpg" alt="Mortgage rate card for loan officer social media posts: 7.28% 30-year fixed average this week, up from 7.11% (Freddie Mac PMMS, Nov 19, 2026)" width="420" />
+  <img src="assets/examples/rate-card.jpg" alt="Mortgage rate card for loan officer social media posts: 7.28%, 30-year fixed, Freddie Mac PMMS average, week of Nov 19, 2026, up 0.17 from last week; 15-year 6.66%, 30-year a year ago 6.26%" width="420" />
 </p>
 
-A rate card the Rate Desk made from the Freddie Mac survey of November 19, 2026, for the fictional lender in the tests (the NMLS number is a placeholder). The card is typeset, not drawn by a model, so the number on it is the number in the survey.
+A rate card the Rate Desk made from the Freddie Mac survey of November 19, 2026, for the fictional lender in the tests, with the change from last week and a context line. The card is typeset, not drawn by a model, so the number on it is the number in the survey.
 
 ## The 3 skills
 

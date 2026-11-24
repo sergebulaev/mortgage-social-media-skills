@@ -69,6 +69,11 @@ End with: `learned: ...`.
    ask. Never round a number from a source.
 3. **Draft per network** in the owner's voice (`voice.md` lines first), with
    the network's length and habits (`../../references/voice-rules.md`).
+   The length limits are hard: X 280 (a link counts 23), Bluesky 300,
+   Threads and Mastodon 500 (`../../references/publishing.md`). Write a
+   short version for those, check each version with its own `--platform`,
+   and keep every required line on every version. If the required lines
+   do not fit a network, make no draft there and say which and why.
 4. **Check. Always, on every post, before anything is shown as final.**
    With Python (`scripts/check_post.py` is in this bundle's root, two folders above this SKILL.md (`${CLAUDE_PLUGIN_ROOT}/scripts/check_post.py` in a plugin install); run it by that absolute path from the working folder):
    `python3 <bundle>/scripts/check_post.py post.txt --memory <memory> --source <data file> --platform <network> --fix`.

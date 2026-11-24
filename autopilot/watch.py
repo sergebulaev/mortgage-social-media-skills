@@ -16,14 +16,19 @@ Hard rules, not settings:
   number check against the event's own data. A text that still fails is not
   drafted; the reason goes to the job summary.
 - At most `max_drafts_per_day` drafts (config, default 3, hard cap 10).
-- One draft per event id (autopilot/state.json, committed back by the
-  workflow), plus a Publora Idempotency-Key from the event id.
+- One text per network (lib/platforms.py): a short version for X, Threads,
+  Bluesky, Mastodon, the full one where it fits. The required lines (license,
+  NMLS, Equal Housing, the source link...) are on every version; a network
+  where they do not fit gets no draft, and the summary says why.
+- Events are drafted once (autopilot/state.json, committed back by the
+  workflow). The Publora Idempotency-Key is the event id plus a hash of the
+  request body: the same body never makes a twin, a changed body (a deleted
+  draft redone with a card) is not refused forever.
 """
 from __future__ import annotations
 
 import argparse
 import datetime as dt
-import hashlib
 import importlib.util
 import json
 import os
@@ -33,9 +38,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from lib import _http, cards, compliance, provenance, style  # noqa: E402
+from lib import _http, cards, compliance, platforms as nets, provenance, style  # noqa: E402
 from lib._env import load_env, pixfaro_key  # noqa: E402
-from lib.publora import PubloraClient, ai_settings, check_targets, platform_of  # noqa: E402
+from lib.publora import PubloraClient, ai_settings, check_targets, draft_body, draft_key, platform_of  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
 HARD_CAP = 10
@@ -157,6 +162,7 @@ def main() -> int:
             args.dry_run = True
         else:
             publora = PubloraClient(client_tag="autopilot")
+    limits = nets.limits(publora)  # live from Publora when there is a key, else the recorded table
 
     drafted = state["drafts_by_day"].get(today, 0)
     for event in events:
@@ -174,6 +180,7 @@ def main() -> int:
         except Exception as exc:
             summary(f"- {eid}: could not write ({exc}); skipped.")
             continue
+        raw = text
         report = compliance.autofix(text, profile=profile, rules=rules, language=event.get("language", language))
         text = report.text
         bad_numbers = provenance.unsupported_numbers(text, [event["data"], profile])
@@ -209,15 +216,47 @@ def main() -> int:
         if not targets:
             summary(f"- {eid}: no channel can take a text-only post; skipped.")
             continue
-        if args.dry_run:
-            summary(f"- {eid}: DRY RUN, would draft to {', '.join(targets)}{card_note}:\n\n{text}\n")
-        else:
-            key = hashlib.sha256(f"{config.get('repo', '')}:{eid}".encode()).hexdigest()[:40]
-            res = publora.create_draft(content=text, platforms=targets, media_urls=media or None,
-                                       platform_settings=ai_settings(targets, False) or None,
-                                       idempotency_key=key)
-            summary(f"- {eid}: draft {res.get('postGroupId')} in Publora{card_note}. Open Publora to review.")
+        lang = event.get("language", language)
+
+        def finish_for(net, lang=lang):
+            return lambda t: compliance.autofix(t, profile=profile, rules=rules, platform=net, language=lang).text
+
+        groups, left_out = nets.versions(raw, targets, finish_for=finish_for, platform_of=platform_of,
+                                         has_media=bool(media), table=limits)
+        for g in list(groups):  # every version passes the same checks as the full text
+            net = platform_of(g["platforms"][0])
+            rep = compliance.check(g["text"], profile=profile, rules=rules, platform=net, language=lang)
+            why = ([f.line() for f in rep.findings if rep.verdict != "PASS"]
+                   + [f"number without source: {n}" for n in provenance.unsupported_numbers(g["text"], [event["data"], profile])]
+                   + [f"voice: {v['code']} {v['match']}" for v in style.lint(g["text"], net)["strict"]]
+                   + getattr(trigger, "extra_check", lambda e, t: [])(event, g["text"]))
+            if rep.verdict != "PASS" or why:
+                groups.remove(g)
+                left_out += [f"{c}: the {net} version fails the check: {'; '.join(why)}" for c in g["platforms"]]
+        for why in left_out:
+            summary(f"- {eid}: not drafted for {why}")
+        if not groups:
+            summary(f"- {eid}: no network can take this post within its limit; skipped.")
+            state["seen"][eid] = {"date": today, "result": "rejected", "tries": (seen or {}).get("tries", 0) + 1}
+            continue
+        made = []
+        for g in groups:
+            nets_label = ", ".join(g["platforms"])
+            if args.dry_run:
+                summary(f"- {eid}: DRY RUN, would draft to {nets_label}{card_note} "
+                        f"({len(g['text'])} characters):\n\n{g['text']}\n")
+                continue
+            settings = ai_settings(g["platforms"], False) or None
+            body = draft_body(g["text"], g["platforms"], media or None, settings)
+            res = publora.create_draft(content=g["text"], platforms=g["platforms"], media_urls=media or None,
+                                       platform_settings=settings,
+                                       idempotency_key=draft_key(config.get("repo", ""), eid, body))
+            made.append({"postGroupId": res.get("postGroupId"), "platforms": g["platforms"]})
+            summary(f"- {eid}: draft {res.get('postGroupId')} for {nets_label} in Publora{card_note}. "
+                    "Open Publora to review.")
         state["seen"][eid] = {"date": today, "result": "dry-run" if args.dry_run else "drafted"}
+        if made:
+            state["seen"][eid]["drafts"] = made
         drafted += 1
         state["drafts_by_day"][today] = drafted
 

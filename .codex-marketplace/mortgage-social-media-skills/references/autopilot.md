@@ -19,11 +19,15 @@ Does: on its cron (`.github/workflows/autopilot.yml`), runs
 a new event for your area (a new weekly Freddie Mac PMMS rate, published Thursdays at noon Eastern). For each new event it writes
 the post (with Claude, or from `autopilot/templates.json`), runs the same
 compliance check and number check as the skills, adds a data card when a
-Pixfaro key is set, and creates a draft in Publora with an idempotency key.
+Pixfaro key is set, fits the text to each network (a short version for X,
+Bluesky, Threads and Mastodon, the full one for Facebook and LinkedIn, every
+required line kept on each; a network where they cannot fit is skipped and
+the summary says why), and creates one draft per text version in Publora,
+with an idempotency key made from the event and the request body.
 
 Never: publishes or schedules (there is no code path for it); drafts the
 same event twice (event ids are kept in `autopilot/state.json`); drafts more
-than `max_drafts_per_day` (default 3, hard cap 10); drafts a text that fails
+than `max_drafts_per_day` events (default 3, hard cap 10); drafts a text that fails
 the check (the reason goes to the run's summary instead).
 
 ## Set up (10 minutes, a GitHub fork)
@@ -78,4 +82,5 @@ minute). Publora drafts count toward nothing until scheduled.
 | `Source check failed` | the feed is down or changed; nothing was drafted. The manual path in `sources.md` still works |
 | `NOT drafted, check FAIL` | the text broke a rule that could not be fixed automatically, often a missing license or ID in the config |
 | `PUBLORA_API_KEY is not set` | add the secret; the run fell back to a dry run |
-| `Daily limit ... reached` | raise `max_drafts_per_day` (max 10) or wait |
+| `Daily limit ... reached` | raise `max_drafts_per_day` (max 10) or wait. The limit counts events; one event can make a draft per text version (say one for X and Bluesky, one for Facebook and LinkedIn) |
+| `not drafted for twitter-...: the opening line and the required lines need N characters` | the lines the rules require do not fit that network; the other networks got their draft. Post there by hand or take the channel out of `platforms` |
