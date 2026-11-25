@@ -95,7 +95,7 @@
       "append": "Rates shown are Freddie Mac PMMS weekly national averages, not a quote or an offer of credit. Your own rate depends on your situation.",
       "message": "A rate quoted from Freddie Mac's survey is an average, not what you offer. Name the source and say it is not an offer. Not applied to a post that states your own APR: then the offer rules apply instead.",
       "source": "Reg N (MAP Rule), 12 CFR 1014.3(b); Regulation Z, 12 CFR 1026.24(c)",
-      "checked": "2026-11-19"
+      "checked": "2026-11-24"
     },
     {
       "id": "NMLS-ID",
@@ -105,9 +105,9 @@
         "NMLS[^\\n]{0,20}\\d{3,}[\\s\\S]*NMLS[^\\n]{0,20}\\d{3,}"
       ],
       "append": "{owner_name} | NMLS #{nmls_id} | {company_name} | NMLS #{company_nmls_id}",
-      "message": "State rules require the originator's name and NMLS ID (and usually the company's) on advertising, including social media. Maryland accepts the ID on the profile instead; this bundle adds it to every post. Both numbers are required: the check passes only when two NMLS IDs are present.",
-      "source": "SAFE Act state rules; Texas SML RMLO social media requirements (2025); COMAR 09.03.06.06",
-      "checked": "2026-11-19"
+      "message": "State rules require the originator's name and NMLS ID (and usually the company's) on advertising, including social media. Texas and Maryland accept them on the profile instead; this bundle adds it to every post. Both numbers are required: the check passes only when two NMLS IDs are present.",
+      "source": "SAFE Act state rules; 7 Tex. Admin. Code 56.203(c), (e) and 57.203(c), (e) (eff. 2024-11-23; Texas SML, RMLO Social Media Requirements and Best Practices v3, 2025); COMAR 09.03.06.06B(4)-(5)",
+      "checked": "2026-11-24"
     },
     {
       "id": "EQUAL-HOUSING",
@@ -145,8 +145,8 @@
         "\\bguarantee (you|that)\\b[^.\\n]{0,40}\\b(approv|qualif|close|closing|rate)"
       ],
       "message": "Approval depends on underwriting. Promising it misrepresents the terms of credit. Say what you will do instead (review options, explain programs).",
-      "source": "Reg N (MAP Rule), 12 CFR 1014.3; FTC Act §5",
-      "checked": "2026-11-19"
+      "source": "Reg N (MAP Rule), 12 CFR 1014.3(q); FTC Act §5",
+      "checked": "2026-11-24"
     },
     {
       "id": "MAP-GOVERNMENT",
@@ -160,7 +160,7 @@
       ],
       "message": "FHA, VA and USDA loans are government-insured or guaranteed, but you are not the government. Do not suggest an official program, a government grant for all, or an endorsement.",
       "source": "Reg N (MAP Rule), 12 CFR 1014.3(n); Regulation Z, 12 CFR 1026.24(i)(3)",
-      "checked": "2026-11-19"
+      "checked": "2026-11-24"
     },
     {
       "id": "MAP-FORECAST",
@@ -172,7 +172,7 @@
       ],
       "message": "Nobody knows next week's rate. Say what happened (the survey), not what will happen, or attribute a forecast to its source.",
       "source": "Reg N (MAP Rule), 12 CFR 1014.3(b); FTC Act §5",
-      "checked": "2026-11-19"
+      "checked": "2026-11-24"
     },
     {
       "id": "MAP-FIXED",
@@ -184,7 +184,7 @@
       ],
       "message": "An adjustable-rate product is fixed only for its initial period. Say how long, and that it adjusts after.",
       "source": "Reg N (MAP Rule), 12 CFR 1014.3(g); Regulation Z, 12 CFR 1026.24(i)(1)",
-      "checked": "2026-11-19"
+      "checked": "2026-11-24"
     },
     {
       "id": "RESPA-REFERRAL",
@@ -224,8 +224,8 @@
         "according to"
       ],
       "message": "'Lowest rates in town' needs proof the post shows. Use a specific, sourced fact from facts.md instead.",
-      "source": "FTC Act §5; Reg N (MAP Rule), 12 CFR 1014.3",
-      "checked": "2026-11-19"
+      "source": "FTC Act §5; Reg N (MAP Rule), 12 CFR 1014.3(b)",
+      "checked": "2026-11-24"
     },
     {
       "id": "REGZ-COUNSELOR",

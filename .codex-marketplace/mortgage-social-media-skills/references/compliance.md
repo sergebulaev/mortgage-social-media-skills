@@ -5,7 +5,8 @@ example and the fix. Machine half: `compliance-rules.json` (same ids), run by
 `scripts/check_post.py` and the autopilot. Rules every vertical shares:
 `compliance-common.md`.
 
-Verified 2026-11-19 against the sources named; reviewed quarterly. **Not
+Verified 2026-11-19 against the sources named; Reg N, Texas and Maryland
+citations re-read in the official text 2026-11-24; reviewed quarterly. **Not
 legal advice.** Many lenders require compliance approval before any post
 (`compliance_review: yes` in the profile): then a draft in Publora is where the
 post waits for that approval, and the skills say so.
@@ -69,7 +70,7 @@ approved figures). The skills never compute or invent an APR.
 
 | Id | Level | Rule |
 |---|---|---|
-| RATE-AVERAGE-LABEL | fix | A post that quotes a Freddie Mac / PMMS / survey rate carries a line that it is a weekly national average and not a quote or an offer. It is not applied to a post that states your own APR (the offer rules apply then) (12 CFR 1014.3(b)) |
+| RATE-AVERAGE-LABEL | fix | A post that quotes a Freddie Mac / PMMS / survey rate carries a line that it is a weekly national average and not a quote or an offer. It is not applied to a post that states your own APR (the offer rules apply then) (the bundle's reading of 12 CFR 1014.3(b)) |
 
 Reporting "the 30-year fixed averaged 7.28% this week (Freddie Mac PMMS)" is
 market news, not an offer of your loan; the label keeps it from being read as
@@ -85,11 +86,18 @@ figure, so the label can never satisfy the APR rule for an offer. Never round th
 | NMLS-ID | fix | Every post carries the loan officer's name and NMLS ID and the company's name and NMLS ID (the check needs both numbers) |
 | EQUAL-HOUSING | fix | Every post carries the Equal Housing line: `eho_statement` from the profile ("Equal Housing Lender" for a lender that prints it), or "Equal Housing Opportunity" when it is empty. Not required when the profile says `equal_housing_line: off` |
 
-NMLS: state rules require the originator's unique identifier on advertising;
-Texas spells it out for social media (Texas SML, "RMLO Social Media
-Requirements and Best Practices", 2025); Maryland accepts the ID on the
-profile instead of each post (COMAR 09.03.06.06). The bundle adds the line to
-every post as the safe default. Line format, from the profile:
+NMLS: state rules require the originator's unique identifier on advertising.
+Texas: an advertisement, a social media post included, carries the company's
+name and NMLS ID, the company's website if it has one, and the originator's
+name and NMLS ID (7 Tex. Admin. Code 56.203(c) for mortgage companies,
+57.203(c) for mortgage bankers, in force since 2024-11-23; the Texas SML
+"RMLO Social Media Requirements and Best Practices" v3, 2025, points to the
+same sections). On a social media site the same information may instead sit
+prominently on the profile or home page (56.203(e), 57.203(e)). Maryland: the
+licensee's NMLS ID goes in every advertisement, and on social media it may sit
+prominently on the profile instead of each post (COMAR 09.03.06.06B(4)-(5)).
+The bundle adds the line to every post as the safe default; the company
+website is not in that line, so a Texas profile should show it. Line format, from the profile:
 `<owner_name> | NMLS #<nmls_id> | <company_name> | NMLS #<company_nmls_id>`.
 
 Equal Housing: a legal requirement for some lenders (FDIC-supervised banks
@@ -109,11 +117,11 @@ bars misrepresenting the terms of mortgage credit.
 
 | Id | Level | Rule | Fails |
 |---|---|---|---|
-| MAP-GUARANTEE | block | No guaranteed approval or closing, "everyone qualifies", "no credit check", "100% approval" | "Pre-approved in 24 hours, guaranteed." |
+| MAP-GUARANTEE | block | No guaranteed approval or closing, "everyone qualifies", "no credit check", "100% approval" (1014.3(q)) | "Pre-approved in 24 hours, guaranteed." |
 | MAP-GOVERNMENT | flag | No implied government affiliation or official program (1014.3(n); Reg Z 1026.24(i)(3)) | "The government wants you to own a home" |
-| MAP-FORECAST | flag | No rate forecast stated as fact (1014.3(b)) | "Rates will probably drop next month, buy now" |
+| MAP-FORECAST | flag | No rate forecast stated as fact (the bundle's reading of 1014.3(b), "any other rate") | "Rates will probably drop next month, buy now" |
 | MAP-FIXED | flag | "Fixed" for an adjustable product needs the period (1014.3(g); Reg Z 1026.24(i)(1)) | "5/6 ARM, fixed for life" |
-| SUPERLATIVE-UNPROVEN | flag | "Lowest rates in town", "#1 lender" need proof shown in the post | "Best rates in Austin" |
+| SUPERLATIVE-UNPROVEN | flag | "Lowest rates in town", "#1 lender" need proof shown in the post (FTC Act §5; 1014.3(b)) | "Best rates in Austin" |
 
 FHA, VA and USDA loans are government-insured or guaranteed; saying so is
 fine. Implying that you are the government, or that a program is free money
@@ -159,8 +167,8 @@ typical.
 
 | State | What changes | Source |
 |---|---|---|
-| TX | Social media: name and NMLS ID on the profile and on ads; the company's NMLS ID; see the SML guide for page names and posts | Texas SML RMLO social media requirements (2025) |
-| MD | NMLS ID may sit on the profile rather than each post | COMAR 09.03.06.06 |
+| TX | Company name and NMLS ID, company website, originator name and NMLS ID on every ad; on social media they may sit on the profile instead; a team name carries the company name and NMLS ID | 7 TAC 56.203(c), (e), (f); 57.203 for mortgage bankers |
+| MD | The licensee's NMLS ID in every ad; on social media it may sit on the profile rather than each post | COMAR 09.03.06.06B(4)-(5) |
 | All others | the bundle's default (NMLS line on every post) | state SAFE Act rules (vary; not verified one by one) |
 
 ## Images

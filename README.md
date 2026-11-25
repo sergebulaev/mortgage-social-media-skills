@@ -145,7 +145,7 @@ per account a month.
 - Reg Z advertising rules (12 CFR 1026.24): trigger terms, APR with any rate offer.
 - Rate posts quote the Freddie Mac survey as market news with a not-an-offer label. That is the bundle's reading, not settled law: confirm it once with your compliance team.
 - NMLS ID of the loan officer and the company; the Equal Housing line on every post by default ("Equal Housing Opportunity" unless your profile says otherwise; `equal_housing_line: off` switches it off).
-- Reg N / MAP Rule (12 CFR 1014): no guaranteed approval, no implied government affiliation.
+- Reg N / MAP Rule (12 CFR 1014.3(q), (n)): no guaranteed approval, no implied government affiliation.
 - RESPA §8 for realtor co-marketing; fair lending wording.
 - FTC reviews and endorsements rules for testimonials; no invented numbers.
 

@@ -114,7 +114,8 @@ End with: `learned: ...`.
   stated as an APR (1026.24(c)). Survey averages (Freddie Mac PMMS) are named
   as averages with the source and a line that they are not an offer.
 - **NMLS ID** of the loan officer and the company on every post (state
-  rules; Texas SML social media guide), and the **Equal Housing** line on
+  rules, e.g. Texas 7 TAC 56.203; Texas and Maryland also accept them on
+  the profile), and the **Equal Housing** line on
   every post by default: your `eho_statement`, or "Equal Housing
   Opportunity" if the profile has none; `equal_housing_line: off` in the
   profile switches it off (only on your compliance team's say-so).
