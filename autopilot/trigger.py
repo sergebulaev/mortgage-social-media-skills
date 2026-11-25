@@ -44,6 +44,14 @@ def _delta(change: str) -> str:
     return f"{'▲' if v > 0 else '▼'} {change.lstrip('+-')} from last week"
 
 
+def _nmls_tail(profile: dict) -> str:
+    """The company's NMLS on the card's context line: the name slot under the
+    card is too narrow for "Company LLC, NMLS #..." (cut on the 2026-11-24
+    render), so the name goes there and the number here."""
+    nmls = str(profile.get("company_nmls_id", "")).strip()
+    return f" Company NMLS #{nmls}." if nmls else ""
+
+
 def _context(week: dict) -> str:
     parts = []
     if week.get("rate_15"):
@@ -79,6 +87,11 @@ def events(config: dict, fixtures: Path | None = None, today: str = "") -> list[
                   "no down payment percentages, no 'my rate', no forecast."),
         "card": {"kind": "stat", "value": f"{week['rate_30']}%",
                  "label": f"30-year fixed, Freddie Mac PMMS average, week of {data['week_label']}",
-                 "delta": _delta(week.get("change_30", "")), "context": _context(week),
-                 "source": "Freddie Mac PMMS"},
+                 "delta": _delta(week.get("change_30", "")),
+                 "context": _context(week) + _nmls_tail(config.get("profile") or {}),
+                 # The card travels without its post (reshares, screenshots), so it
+                 # carries the not-an-offer line and the company's NMLS itself.
+                 "source": "PMMS weekly national average, not an offer of credit",
+                 **({"name": str((config.get("profile") or {}).get("company_name", "")).strip()}
+                    if (config.get("profile") or {}).get("company_name") else {})},
     }]

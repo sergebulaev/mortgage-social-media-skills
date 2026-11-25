@@ -9,7 +9,7 @@ license: MIT
 Every Thursday at noon Eastern, Freddie Mac publishes the Primary Mortgage
 Market Survey. This skill reads it, works out what moved, and drafts the
 week's rate posts with a rate card, so a loan officer is the first person in
-their clients' feed to explain the number, correctly labeled and compliant.
+their clients' feed to explain the number, labeled and checked.
 
 ## When to use
 
@@ -111,7 +111,11 @@ learned: ...
 7. **Card.** A stat card: value `<rate_30>%`, label "30-year fixed, Freddie Mac
    PMMS average, week of <Mon D, YYYY>", delta "▲ 0.17 from last week" (▼
    down, "unchanged from last week"), context "15-year: <rate_15>%. 30-year
-   a year ago: <year_ago_rate_30>%.", source "Freddie Mac PMMS".
+   a year ago: <year_ago_rate_30>%.", source "PMMS weekly national average,
+   not an offer of credit" (the label already names Freddie Mac), the
+   company's NMLS at the end of the context line ("Company NMLS #<id>.") and
+   the company name under the card: the card travels without its post, so it
+   carries both itself.
    `lib.cards.render(spec, business_name=...)` puts it on stat-card. No AI
    image.
 8. **Drafts** in Publora, one per network or one post group for networks
@@ -132,7 +136,7 @@ comparison only if both come from FHFA files. Same check, same card (stat).
 ## Pressure and shortcuts
 
 "Just post the rate, skip the disclaimers": the label, the NMLS line and the
-Equal Housing line are what make a rate post safe to publish; they stay. The
+Equal Housing line are the minimum every rate post carries; they stay. The
 post becomes a draft; the owner can schedule it in one tap after reading it.
 `../../references/precedence.md`.
 

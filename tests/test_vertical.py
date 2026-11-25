@@ -76,7 +76,7 @@ class SurveyPost(unittest.TestCase):
         applied = " ".join(rep.applied)
         for rid in ("RATE-AVERAGE-LABEL", "NMLS-ID", "EQUAL-HOUSING"):
             self.assertIn(rid, applied)
-        self.assertIn("NMLS #1999001", rep.text)
+        self.assertIn("NMLS #0000002", rep.text)
 
     def test_without_nmls_in_profile_it_fails(self):
         thin = {k: v for k, v in PROFILE.items() if k != "nmls_id"}
@@ -148,7 +148,7 @@ class Claims(unittest.TestCase):
             self.assertFalse({"SUPERLATIVE-UNPROVEN", "MAP-FIXED", "RATE-AVERAGE-LABEL"} & ids(rep), t)
 
     def test_both_nmls_ids_required(self):
-        rep = compliance.check("Questions? Message me. Dana Whitfield NMLS #1999001", profile=PROFILE)
+        rep = compliance.check("Questions? Message me. Dana Sample NMLS #0000002", profile=PROFILE)
         self.assertIn("NMLS-ID", ids(rep))
 
     def test_plain_education_passes(self):
@@ -199,10 +199,18 @@ class RateCard(unittest.TestCase):
         spec = importlib.util.spec_from_file_location("trigger", ROOT / "autopilot" / "trigger.py")
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
-        ev = mod.events({}, fixtures=ROOT / "tests" / "fixtures" / "feeds", today="2026-11-20")[0]
+        import json
+        cfg = json.loads((ROOT / "tests" / "fixtures" / "autopilot-config.json").read_text())
+        ev = mod.events(cfg, fixtures=ROOT / "tests" / "fixtures" / "feeds", today="2026-11-20")[0]
         card = ev["card"]
         self.assertEqual(card["delta"], "▲ 0.17 from last week")
         self.assertIn("15-year: 6.66%", card["context"])
         self.assertEqual(mod._delta("-0.05"), "▼ 0.05 from last week")
         self.assertEqual(mod._delta("0.00"), "unchanged from last week")
         self.assertEqual(provenance.unsupported_numbers(card["delta"] + " " + card["context"], [ev["data"]]), [])
+        self.assertIn("not an offer", card["source"])
+        self.assertEqual(card["name"], "Example Home Lending LLC")
+        self.assertIn("Company NMLS #0000001", card["context"])
+        self.assertLessEqual(len(card["context"]), 120)
+        self.assertLessEqual(len(card["source"]), 80)
+        self.assertLessEqual(len(card["name"]), 60)

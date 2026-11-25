@@ -7,11 +7,11 @@
   "cards": false,
   "platforms": ["facebook-90000000001", "linkedin-90000000003", "instagram-90000000002"],
   "profile": {
-    "business_name": "Lone Star Hearth Lending",
-    "owner_name": "Dana Whitfield",
-    "nmls_id": "1999001",
-    "company_name": "Lone Star Hearth Lending LLC",
-    "company_nmls_id": "1999000",
+    "business_name": "Example Home Lending",
+    "owner_name": "Dana Sample",
+    "nmls_id": "0000002",
+    "company_name": "Example Home Lending LLC",
+    "company_nmls_id": "0000001",
     "eho_statement": "Equal Housing Opportunity",
     "state": "TX"
   }

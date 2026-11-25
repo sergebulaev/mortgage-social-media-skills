@@ -11,7 +11,7 @@
     {
       "name": "mortgage-social-media-skills",
       "source": "./",
-      "description": "3 skills for mortgage loan officers and brokers in Claude and Codex: a monthly social media content calendar, a post writer with a Reg Z trigger-term, APR, NMLS ID and Equal Housing check, and the Thursday Rate Desk that turns this week's Freddie Mac PMMS rate into compliant posts with a rate card. Business memory, drafts in Publora, an autopilot that drafts every Thursday.",
+      "description": "3 skills for mortgage loan officers and brokers in Claude and Codex: a monthly social media content calendar, a post writer with a Reg Z trigger-term, APR, NMLS ID and Equal Housing check, and the Thursday Rate Desk that turns this week's Freddie Mac PMMS rate into posts checked against Reg Z, NMLS and Equal Housing, with a rate card. Business memory, drafts in Publora, an autopilot that drafts every Thursday.",
       "version": "1.0.0",
       "author": {
         "name": "Serge Bulaev",

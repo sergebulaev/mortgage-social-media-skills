@@ -1,5 +1,5 @@
-"""Core contract tests, identical in every vertical bundle (generated from
-vertical-skills-core; edit there). Offline: no network, no keys.
+"""Core contract tests, identical in every vertical bundle (shared, maintained
+upstream; see CONTRIBUTING.md). Offline: no network, no keys.
 
     python3 -m unittest discover -s tests -v
 """

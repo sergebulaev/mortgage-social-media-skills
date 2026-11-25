@@ -1,7 +1,7 @@
 """Shared library of the vertical social media skill bundles (stdlib only).
 
-Generated from vertical-skills-core; do not edit in a vertical repo, edit the
-core and regenerate. Everything is optional: every skill also works by
+Shared by the family of vertical bundles and maintained upstream: propose a
+change in an issue or pull request here (CONTRIBUTING.md). Everything is optional: every skill also works by
 following its SKILL.md with plain file tools.
 """
 from .compliance import autofix, check, load_rules  # noqa: F401

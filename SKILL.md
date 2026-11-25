@@ -1,6 +1,6 @@
 ---
 name: mortgage-social-media
-description: "Social media skills for mortgage loan officers and mortgage brokers: a monthly content calendar, posts with a Reg Z trigger-term, APR, NMLS ID and Equal Housing check, and the Thursday Rate Desk that turns this week's Freddie Mac PMMS rate into compliant posts and a rate card. Business memory, drafts in Publora, never published without your yes."
+description: "Social media skills for mortgage loan officers and mortgage brokers: a monthly content calendar, posts with a Reg Z trigger-term, APR, NMLS ID and Equal Housing check, and the Thursday Rate Desk that turns this week's Freddie Mac PMMS rate into checked posts and a rate card. Business memory, drafts in Publora, never published without your yes."
 license: MIT
 ---
 

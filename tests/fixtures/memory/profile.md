@@ -2,8 +2,8 @@
 
 Fictional test business for the evals. Not a real person or company.
 
-- business_name: Lone Star Hearth Lending
-- owner_name: Dana Whitfield
+- business_name: Example Home Lending
+- owner_name: Dana Sample
 - city: Austin
 - state: TX
 - zip_codes: 78704, 78745, 78748
@@ -15,9 +15,9 @@ Fictional test business for the evals. Not a real person or company.
 
 ## Mortgage Social Media Skills: what the rules need
 
-- nmls_id: 1999001
-- company_name: Lone Star Hearth Lending LLC
-- company_nmls_id: 1999000
+- nmls_id: 0000002
+- company_name: Example Home Lending LLC
+- company_nmls_id: 0000001
 - licensed_states: TX
 - eho_statement: Equal Housing Opportunity
 - apr_disclosure: [none approved yet]

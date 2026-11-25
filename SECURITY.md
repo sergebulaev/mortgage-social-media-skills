@@ -2,8 +2,9 @@
 
 ## Reporting
 
-Please report a vulnerability privately through GitHub's "Report a
-vulnerability" (Security tab), not in a public issue.
+Please report a vulnerability privately: on this repo's **Security** tab,
+**Report a vulnerability** (GitHub private vulnerability reporting). Please
+do not open a public issue for it.
 
 ## What this bundle can touch
 

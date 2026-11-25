@@ -95,7 +95,7 @@ every post as the safe default. Line format, from the profile:
 Equal Housing: a legal requirement for some lenders (FDIC-supervised banks
 use "Equal Housing Lender", 12 CFR 338.3) and the policy of most others. As a
 federal rule for every non-bank originator it is **not verified** (federal
-credit unions: 12 CFR 701.31); the bundle adds it by default (owner's decision
+credit unions: 12 CFR 701.31); the bundle adds it by default (maintainer's decision
 of 2026-11-23), even when the profile has no `eho_statement`: then the line
 reads "Equal Housing Opportunity". A lender that prints "Equal Housing
 Lender" puts that in `eho_statement`. To switch the line off, add
@@ -127,8 +127,11 @@ for everyone, is not.
 
 RESPA §8 (12 U.S.C. 2607) and Regulation X (12 CFR 1024.14) prohibit
 anything of value for referrals of settlement business. A joint post with a
-realtor is fine when each pays its fair share of real costs (CFPB Compliance
-Bulletin 2015-05 on marketing services agreements). The skill flags wording
+realtor is fine when each pays its own share of the cost at market value:
+a payment must be for goods or services actually furnished, not for the
+referral (12 CFR 1024.14(g)(1)(iv), (g)(2); CFPB RESPA Section 8 FAQs,
+October 7, 2020, which replaced Compliance Bulletin 2015-05 on marketing
+services agreements, rescinded the same day). The skill flags wording
 like "referral fee", "send me your buyers and I'll cover your ads".
 
 ## Fair lending wording
