@@ -9,6 +9,7 @@ EXTRA adds the guarantee block and a rate-offer case.
 """
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -95,3 +96,13 @@ def EXTRA(ns):
 
     return {"guarantee-blocked": ("Guaranteed approval is blocked", guarantee),
             "rate-offer-needs-apr": ("Own rate offer needs an APR (none in profile)", rate_offer)}
+
+
+# one-text-per-network on an event (live dry run 2026-11-25: the X version lost the rate)
+_W = _latest()
+FAMILY["event_topic"] = (
+    f"Write this week's rate post. Data (Freddie Mac PMMS, survey of {_week()}, do not fetch): 30-year fixed "
+    f"average {_W['rate_30']}%, the week before {_W['prev_rate_30']}% (change {_W['change_30']}); 15-year "
+    f"{_W['rate_15']}%; a year ago {_W['year_ago_rate_30']}%. Source: https://www.freddiemac.com/pmms.")
+FAMILY["key_facts"] = [re.escape(_W["rate_30"]) + r"\s?%",
+                       re.escape(_W["change_30"].lstrip("+-")) + "|" + re.escape(_W["prev_rate_30"])]

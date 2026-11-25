@@ -15,6 +15,10 @@
   every required line kept); if the required lines alone do not fit, the
   verdict is FAIL and there is no draft for that network. Run it once per
   network you post to: X 280, Bluesky 300, Threads and Mastodon 500.
+- main fact: --must "7.21%" (repeatable) names what the post is about (the
+  rate and its change, the hail size and the place, the product). A version
+  without it is FAIL: write the short version from the fact, do not let the
+  cut drop it (a rate post cut to "the survey is out" said nothing).
 
 Exit code: 0 PASS, 1 FAIL, 2 REVIEW (flags a human must look at). The exit
 code does not change with who asks or how urgent it is.
@@ -60,7 +64,7 @@ def consent_problem(text: str, memory_root, platform: str) -> str:
 
 
 def run(text: str, *, profile: dict, sources: list, platform: str = "", language: str = "",
-        fix: bool = False, memory_root=None) -> dict:
+        fix: bool = False, memory_root=None, must=()) -> dict:
     fit_note = ""
     if fix and platform:
         fitted, fit_note = platforms.fit(
@@ -84,8 +88,11 @@ def run(text: str, *, profile: dict, sources: list, platform: str = "", language
         verdict = "FAIL"
     if fit_note and not fit_note.startswith("shortened"):
         verdict = "FAIL"  # the required lines do not fit this network
+    lost = [m for m in must if m not in final]
+    if lost:
+        verdict = "FAIL"  # the version lost what the post is about
     return {"verdict": verdict, "text": final, "compliance": report.summary(), "consent": consent,
-            "length": fit_note,
+            "length": fit_note, "missing_fact": lost,
             "compliance_verdict": report.verdict, "applied": report.applied,
             "unsupported_numbers": numbers, "voice": voice}
 
@@ -98,6 +105,8 @@ def main() -> int:
     ap.add_argument("--platform", default="")
     ap.add_argument("--language", default="")
     ap.add_argument("--fix", action="store_true")
+    ap.add_argument("--must", action="append", default=[],
+                    help="the post's main fact (a number, a place, a name); every version must keep it")
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
 
@@ -115,7 +124,7 @@ def main() -> int:
         except ValueError:
             sources.append(raw)
     out = run(text, profile=profile, sources=sources, platform=args.platform,
-              language=args.language, fix=args.fix, memory_root=args.memory)
+              language=args.language, fix=args.fix, memory_root=args.memory, must=args.must)
     if args.json:
         print(json.dumps(out, indent=2, ensure_ascii=False))
     else:
@@ -124,6 +133,8 @@ def main() -> int:
             print("Consent: " + out["consent"])
         if out["length"]:
             print("Length: " + out["length"])
+        if out["missing_fact"]:
+            print("Main fact missing (write the short version from it): " + ", ".join(out["missing_fact"]))
         if out["unsupported_numbers"]:
             print("Numbers with no source: " + ", ".join(out["unsupported_numbers"]))
         for f in out["voice"]["strict"]:

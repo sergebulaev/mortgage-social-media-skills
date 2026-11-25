@@ -186,6 +186,50 @@ class Trigger(unittest.TestCase):
         self.assertEqual(trig.events({}, fixtures=FIX / "feeds", today="2026-12-01"), [])
 
 
+def _short_version(ev, cfg, net="twitter"):
+    """The version watch.py makes for `net` (no Publora, no model)."""
+    import importlib.util
+    import json as _json
+    from lib import compliance as _c, platforms as _p
+    spec = importlib.util.spec_from_file_location("watch_short", ROOT / "autopilot" / "watch.py")
+    w = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(w)
+    tpl = _json.loads((ROOT / "autopilot" / "templates.json").read_text(encoding="utf-8"))
+    prof = {k: v for k, v in cfg.get("profile", {}).items() if str(v).strip()}
+    lang = ev.get("language", "en")
+    full = w.from_template(ev, tpl, prof, lang)
+    short, cta, must = w.short_parts(ev, tpl, prof, lang)
+    out, why = _p.fit(full, net, short=short, cta=cta, must=must,
+                      finish=lambda t: _c.autofix(t, profile=prof, platform=net, language=lang).text)
+    return out, why, must, prof
+
+
+class ShortVersion(unittest.TestCase):
+    """Live dry run 2026-11-25 (PMMS 7.21%): the X version had no rate and no change."""
+
+    def test_x_version_carries_rate_change_and_required_lines(self):
+        import importlib.util
+        import json
+        spec = importlib.util.spec_from_file_location("trigger_sv", ROOT / "autopilot" / "trigger.py")
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        cfg = json.loads((FIX / "autopilot-config.json").read_text())
+        ev = mod.events(cfg, fixtures=FIX / "feeds", today="2026-11-20")[0]
+        week = dict(ev["fields"], rate_30="7.21", change_30="-0.07", delta_short=mod._delta_short("-0.07"),
+                    delta_paren=" (▼0.07)", change_abs="0.07")
+        ev = dict(ev, fields=week, data=dict(ev["data"], rate_30="7.21", change_30="-0.07"))
+        from lib import platforms
+        for net in ("twitter", "bluesky", "threads"):
+            out, why, must, prof = _short_version(ev, cfg, net)
+            self.assertEqual(why, "", net)
+            for m in ("7.21%", "▼0.07", "not an offer", "Freddie Mac", "NMLS #0000002", "NMLS #0000001",
+                      "Equal Housing", "https://www.freddiemac.com/pmms"):
+                self.assertIn(m, out, (net, out))
+            self.assertLessEqual(platforms.count(out, net), platforms.limit_for(net), net)
+            self.assertEqual(compliance.check(out, profile=prof, platform=net).verdict, "PASS", out)
+        self.assertEqual(mod._delta_short("0.00"), "unchanged")
+
+
 if __name__ == "__main__":
     unittest.main()
 

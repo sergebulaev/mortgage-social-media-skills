@@ -172,6 +172,39 @@ class Platforms(unittest.TestCase):
                                         platform_of=publora.platform_of)
         self.assertTrue(skipped and skipped[0].startswith("twitter-1:"))
 
+    def test_short_version_is_the_event_fact_not_a_cut(self):
+        """Live dry run 2026-11-25: X got "Freddie Mac's weekly survey is out." and no rate."""
+        text = ("Freddie Mac's weekly survey is out. The average 30-year fixed rate is 7.21%, down 0.07. "
+                + "More detail about the week. " * 12 + "\n\nSource: https://example.gov/pmms")
+        short = "30-yr fixed 7.21% (▼0.07) this week, weekly national average, not an offer of credit."
+        out, why = platforms.fit(text, "twitter", finish=self.footer, short=short, cta="Message me.",
+                                 must=["7.21%", "▼0.07"])
+        self.assertEqual(why, "")
+        self.assertTrue(out.startswith(short), out)
+        for m in ("7.21%", "▼0.07", "https://example.gov/pmms", "License #12345", "Message me."):
+            self.assertIn(m, out)
+        self.assertLessEqual(platforms.count(out, "twitter"), 280)
+        # LinkedIn keeps the full text
+        full, _ = platforms.fit(text, "linkedin", finish=self.footer, short=short, must=["7.21%"])
+        self.assertEqual(full, self.footer(text))
+
+    def test_cta_only_when_it_fits(self):
+        text = "x " * 200 + "\n\nSource: https://example.gov/a"
+        out, _ = platforms.fit(text, "twitter", short="Fact 1.25 inch.", cta="C" * 300, must=["1.25 inch"])
+        self.assertNotIn("CCC", out)
+        self.assertIn("1.25 inch", out)
+
+    def test_no_version_when_fact_and_required_lines_do_not_fit(self):
+        out, why = platforms.fit("y " * 200, "twitter", finish=lambda t: t + "\n" + "R" * 270,
+                                 short="The rate is 7.21% this week.", must=["7.21%"])
+        self.assertIsNone(out)
+        self.assertIn("main fact", why)
+
+    def test_full_text_without_the_fact_falls_back_to_short(self):
+        out, _ = platforms.fit("A short text with no number.", "facebook", short="Hail up to 1.25 inch.",
+                               must=["1.25 inch"])
+        self.assertEqual(out, "Hail up to 1.25 inch.")
+
     def test_too_long_is_strict_on_x_and_threads(self):
         self.assertFalse(style.lint("word " * 70, "twitter")["ok"])
         self.assertFalse(style.lint("word " * 110, "threads")["ok"])
@@ -389,9 +422,47 @@ class Autopilot(unittest.TestCase):
                     self.assertEqual(rep.verdict, "PASS", (conn, rep.summary()))
             skipped = re.findall(r"not drafted for (\S+): ", out.stdout)
             self.assertEqual(covered | {s.rstrip(":") for s in skipped}, set(cfg["platforms"]), out.stdout)
+            # Every version, short ones first of all, carries the event's main fact.
+            watch = _load_watch()
+            templates = json.loads((ROOT / "autopilot" / "templates.json").read_text(encoding="utf-8"))
+            evs = {e["id"]: e for e in watch.load_trigger().events(cfg, fixtures=FIX / "feeds",
+                                                                     today=cfg["test_today"])}
+            for eid, text in re.findall(r"^- (\S+): DRY RUN, would draft to [^\n]*\n\n(.*?)(?=\n- \S+: |\Z)",
+                                        out.stdout, re.M | re.S):
+                ev = evs[eid]
+                _, _, must = watch.short_parts(ev, templates, cfg.get("profile", {}),
+                                               ev.get("language", cfg.get("language", "en")))
+                self.assertTrue(must, f"{ev['template']}: no main fact (must) in templates.json")
+                for m in must:
+                    self.assertIn(m, text, (eid, text))
+
+
+def _load_watch():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("watch_under_test", ROOT / "autopilot" / "watch.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
 
 class BundleContract(unittest.TestCase):
+    def test_every_template_has_a_short_version_and_a_main_fact(self):
+        """The short version for X, Bluesky and Threads comes from the event, per language."""
+        templates = json.loads((ROOT / "autopilot" / "templates.json").read_text(encoding="utf-8"))
+        for name, entry in templates.items():
+            langs = [k for k in entry if k not in ("short", "cta", "must")]
+            for lang in langs:
+                self.assertTrue((entry.get("short") or {}).get(lang), f"{name}: no short.{lang}")
+            must = entry.get("must")
+            self.assertTrue(must, f"{name}: no must")
+            for lang in langs:
+                ms = must.get(lang) if isinstance(must, dict) else must
+                self.assertTrue(ms, f"{name}: no must for {lang}")
+        # That the filled short text contains the filled must strings is checked
+        # on the fixture events in test_one_text_per_network and in the
+        # vertical's own tests (a must can sit inside a field of the short text).
+
+
     def test_three_skills_named_by_scheme(self):
         names = sorted(p.parent.name for p in (ROOT / "skills").glob("*/SKILL.md"))
         self.assertEqual(names, sorted(V["skills"].values()))

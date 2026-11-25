@@ -19,7 +19,11 @@ Hard rules, not settings:
 - One text per network (lib/platforms.py): a short version for X, Threads,
   Bluesky, Mastodon, the full one where it fits. The required lines (license,
   NMLS, Equal Housing, the source link...) are on every version; a network
-  where they do not fit gets no draft, and the summary says why.
+  where they do not fit gets no draft, and the summary says why. The short
+  version is built from the event's main fact (templates.json "short"), not
+  cut from the full text, and every version carries the "must" strings (the
+  rate and its change, the hail size and place...): a version without them is
+  not drafted.
 - Events are drafted once (autopilot/state.json, committed back by the
   workflow). The Publora Idempotency-Key is the event id plus a hash of the
   request body: the same body never makes a twin, a changed body (a deleted
@@ -73,6 +77,30 @@ def from_template(event: dict, templates: dict, profile: dict, language: str) ->
     text = entry.get(language) or entry["en"]
     values = {**profile, **event.get("fields", {})}
     return text.format_map(values).strip()
+
+
+def short_parts(event: dict, templates: dict, profile: dict, language: str) -> tuple:
+    """(short, cta, must) for the networks that cannot take the full text.
+
+    templates.json, next to the language texts of an entry:
+      "short": {"en": "..."}   the event's main fact in one or two sentences
+      "cta":   {"en": "..."}   added to the short version when it still fits
+      "must":  ["{rate_30}%"]  (or {"en": [...]}) strings every version contains
+    Built from the trigger's fields in both modes (template and model), so the
+    numbers in it are the feed's. No short text in this language: (None, None, must)."""
+    entry = templates.get(event.get("template", ""), {})
+    values = {**profile, **event.get("fields", {})}
+
+    def fmt(x):
+        return x.format_map(values).strip() if isinstance(x, str) and x.strip() else None
+
+    short = fmt((entry.get("short") or {}).get(language))
+    cta = fmt((entry.get("cta") or {}).get(language))
+    must = entry.get("must") or []
+    if isinstance(must, dict):
+        must = must.get(language) or []
+    must = [m for m in (fmt(x) for x in must) if m] + list(event.get("must", []))
+    return short, cta, must
 
 
 def from_model(event: dict, profile: dict, voice: str, rules_text: str, language: str,
@@ -221,15 +249,21 @@ def main() -> int:
         def finish_for(net, lang=lang):
             return lambda t: compliance.autofix(t, profile=profile, rules=rules, platform=net, language=lang).text
 
+        try:
+            short, cta, must = short_parts(event, templates, profile, lang)
+        except (KeyError, ValueError) as exc:
+            summary(f"- {eid}: the short version could not be built ({exc}); long networks only.")
+            short, cta, must = None, None, []
         groups, left_out = nets.versions(raw, targets, finish_for=finish_for, platform_of=platform_of,
-                                         has_media=bool(media), table=limits)
+                                         has_media=bool(media), table=limits, short=short, cta=cta, must=must)
         for g in list(groups):  # every version passes the same checks as the full text
             net = platform_of(g["platforms"][0])
             rep = compliance.check(g["text"], profile=profile, rules=rules, platform=net, language=lang)
             why = ([f.line() for f in rep.findings if rep.verdict != "PASS"]
                    + [f"number without source: {n}" for n in provenance.unsupported_numbers(g["text"], [event["data"], profile])]
                    + [f"voice: {v['code']} {v['match']}" for v in style.lint(g["text"], net)["strict"]]
-                   + getattr(trigger, "extra_check", lambda e, t: [])(event, g["text"]))
+                   + getattr(trigger, "extra_check", lambda e, t: [])(event, g["text"])
+                   + [f"the event's main fact is missing: {m}" for m in must if m not in g["text"]])
             if rep.verdict != "PASS" or why:
                 groups.remove(g)
                 left_out += [f"{c}: the {net} version fails the check: {'; '.join(why)}" for c in g["platforms"]]

@@ -213,9 +213,15 @@ def family_cases(cfg: dict) -> dict:
                   "threads": "threads-90000000013", "facebook": "facebook-90000000001",
                   "linkedin": "linkedin-90000000003"}
 
+    # cases.py: "event_topic" is a post about one event from the bundle's own
+    # fixture (this week's rate, a hail day, a recall...), "key_facts" the
+    # regexes every network's version must still contain (the live dry run of
+    # 2026-11-25 sent X a rate post without the rate).
+    key_facts = cfg.get("key_facts", [])
+
     def per_network():
-        prompt = (f"Use the {V['skills']['writer']} skill. {cfg['draft_topic']} Put it in Publora as drafts for "
-                  "X, Bluesky, Threads, Facebook and LinkedIn.")
+        prompt = (f"Use the {V['skills']['writer']} skill. {cfg.get('event_topic') or cfg['draft_topic']} "
+                  "Put it in Publora as drafts for X, Bluesky, Threads, Facebook and LinkedIn.")
 
         def setup(w):
             setup_workdir(w)
@@ -240,6 +246,9 @@ def family_cases(cfg: dict) -> dict:
                     rep = compliance.check(text, profile=profile(), platform=net)
                     if rep.verdict == "FAIL":
                         return False, f"{net} version fails the check: " + "; ".join(f.rule_id for f in rep.findings)
+                    lost = [k for k in key_facts if not re.search(k, text, re.I)]
+                    if lost:
+                        return False, f"the {net} version lost the event's main fact: {', '.join(lost)}"
             for net in ("facebook", "linkedin"):
                 if net not in covered:
                     return False, f"no draft for {net}"
@@ -248,7 +257,8 @@ def family_cases(cfg: dict) -> dict:
                         rf"(\b{net}\b|\bX\b)[^\n]{{0,200}}(limit|characters|fit|too long)|"
                         rf"(limit|characters|fit|too long)[^\n]{{0,200}}(\b{net}\b|\bX\b)", r.output, re.I):
                     return False, f"no {net} draft and no reason given"
-            return True, f"one text per network within limits ({', '.join(sorted(covered))}), required lines kept"
+            return True, (f"one text per network within limits ({', '.join(sorted(covered))}), required lines kept"
+                          + (", main fact in every version" if key_facts else ""))
         return prompt, setup, grade
 
     cases["one-text-per-network"] = ("A short version for X, Bluesky and Threads, full for Facebook and LinkedIn",

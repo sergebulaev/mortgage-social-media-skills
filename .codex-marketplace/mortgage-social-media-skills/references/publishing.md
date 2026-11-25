@@ -63,12 +63,17 @@ plus `Idempotency-Key`. `platforms` is an array of STRINGS. Python:
   (Publora `GET /platform-limits`, recorded in `lib/platforms.py`). The limit
   is hard on X and Threads too: Publora accepts a long draft, publishing it
   fails. Write the full post for Facebook and LinkedIn and a short version
-  for X, Bluesky, Threads and Mastodon, and run `scripts/check_post.py
-  --platform <network> --fix` on every version: the required lines (license,
+  for X, Bluesky, Threads and Mastodon. The short version is written from the
+  post's main fact, not cut from the long one: a rate post keeps the rate and
+  the change ("30-yr fixed 7.21% (▼0.07) this week, Freddie Mac weekly
+  national average, not an offer of credit"), a storm post the hail size and
+  the place, a recall the product. Run `scripts/check_post.py --platform
+  <network> --fix --must "<fact>"` on every version: the required lines (license,
   NMLS, Equal Housing, the source link, every line the check appends) stay
   on each, and the script cuts the body to fit if needed. If the required
   lines alone do not fit, there is no draft for that network: say which one
-  and why. One draft per text version, with the channels that share it.
+  and why. The same when the fact and the required lines do not fit together:
+  no draft beats a post that says nothing. One draft per text version, with the channels that share it.
 - `aiGenerated: true` goes into `platformSettings` for instagram, tiktok,
   youtube and twitter whenever the image is AI-generated (`images.md`). A
   typeset data card is not AI-generated: no flag.

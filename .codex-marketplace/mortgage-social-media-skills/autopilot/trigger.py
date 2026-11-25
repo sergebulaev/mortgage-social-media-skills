@@ -44,6 +44,14 @@ def _delta(change: str) -> str:
     return f"{'▲' if v > 0 else '▼'} {change.lstrip('+-')} from last week"
 
 
+def _delta_short(change: str) -> str:
+    """The change for the short version: "▲0.17", "▼0.07", "unchanged" ("" without one)."""
+    if not change:
+        return ""
+    v = float(change)
+    return "unchanged" if v == 0 else f"{'▲' if v > 0 else '▼'}{change.lstrip('+-')}"
+
+
 def _nmls_tail(profile: dict) -> str:
     """The company's NMLS on the card's context line: the name slot under the
     card is too narrow for "Company LLC, NMLS #..." (cut on the 2026-11-24
@@ -75,7 +83,13 @@ def events(config: dict, fixtures: Path | None = None, today: str = "") -> list[
             "week_label": _pretty(week["week_of"]), "prev_label": _pretty(week["prev_week"]),
             "year_ago_label": _pretty(week["year_ago_week"])}
     fields = {**data, "direction_30": _direction(week["change_30"]),
-              "direction_15": _direction(week["change_15"])}
+              "direction_15": _direction(week["change_15"]),
+              # short version for X, Bluesky, Threads: the rate and the change
+              "delta_short": _delta_short(week.get("change_30", "")),
+              "delta_paren": f" ({_delta_short(week['change_30'])})" if week.get("change_30") else "",
+              # the size of the change, as both versions write it ("up 0.17 points", "▲0.17")
+              "change_abs": (week.get("change_30") or "").lstrip("+-") if week.get("change_30")
+              and float(week["change_30"]) != 0 else ""}
     return [{
         "id": f"pmms-{week['week_of']}",
         "title": f"Freddie Mac PMMS, week of {data['week_label']}",

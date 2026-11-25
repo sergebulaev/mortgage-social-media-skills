@@ -21,6 +21,17 @@ Equal Housing, license number, the survey label, the 21+ line...) come back
 on the short version too and are counted. When even the first unit plus the
 required lines do not fit, there is no version for that network, and the
 reason says how many characters the required part needs.
+
+The short version of an EVENT is not a cut of the full text (the live dry run
+of 2026-11-25 cut a rate post down to "Freddie Mac's weekly survey is out."
+plus the required lines: no rate, no change). When the event gives a `short`
+text (its main fact: the rate and the change, the hail size and the place, the
+recalled product, the cutoff that moved), a network that cannot take the full
+text gets `short`, the text's link lines, and the `cta` when it still fits;
+`finish` adds the required lines as always. `must` lists the strings every
+version has to contain (the main fact): a full text without them is not used
+as is. When `short` plus the required lines do not fit, there is no version
+for that network: no draft beats a post that says nothing.
 """
 from __future__ import annotations
 
@@ -93,16 +104,38 @@ def _join(units: list[tuple[int, int, str]]) -> str:
     return "\n\n".join("\n".join(" ".join(ss) for ss in lines.values()) for lines in paras.values())
 
 
+def has_all(text: str, must) -> bool:
+    return all(m in text for m in (must or ()))
+
+
 def fit(text: str, platform: str, *, finish: Callable[[str], str] = lambda t: t,
-        has_media: bool = False, table: Optional[dict] = None) -> tuple[Optional[str], str]:
+        has_media: bool = False, table: Optional[dict] = None, short: Optional[str] = None,
+        cta: Optional[str] = None, must=()) -> tuple[Optional[str], str]:
     """(final text, "") when a version fits, else (None, reason).
 
     `text` is the post BEFORE the autofix; `finish` turns a candidate into the
-    final text (autofix), so appended lines are part of the count."""
+    final text (autofix), so appended lines are part of the count. `short`,
+    `cta` and `must` come from the event (see the module docstring)."""
     lim = limit_for(platform, has_media, table)
     full = finish(text)
-    if lim is None or count(full, platform) <= lim:
+    if (lim is None or count(full, platform) <= lim) and has_all(full, must):
         return full, ""
+    if short and short.strip():
+        short = short.strip()
+        links = [u[2] for u in _units(text)
+                 if URL.search(u[2]) and not any(x in short for x in URL.findall(u[2]))]
+        base = finish("\n\n".join([short] + links))
+        if lim is not None and count(base, platform) > lim:
+            return None, (f"{platform}: the event's main fact and the required lines need "
+                          f"{count(base, platform)} characters, {platform} allows {lim}; no draft for "
+                          f"{platform} (a post without the fact would say nothing)")
+        if cta and cta.strip():
+            trial = finish("\n\n".join([short, cta.strip()] + links))
+            if lim is None or count(trial, platform) <= lim:
+                base = trial
+        return base, ""
+    if lim is None or count(full, platform) <= lim:
+        return full, ""  # no short text to fall back on; the caller checks `must`
     units = _units(text)
     if not units:
         return None, f"{platform}: empty post"
@@ -129,7 +162,8 @@ def fit(text: str, platform: str, *, finish: Callable[[str], str] = lambda t: t,
 
 def versions(text: str, platforms: list[str], *, finish_for: Callable[[str], Callable[[str], str]],
              platform_of: Callable[[str], str], has_media: bool = False,
-             table: Optional[dict] = None) -> tuple[list[dict], list[str]]:
+             table: Optional[dict] = None, short: Optional[str] = None, cta: Optional[str] = None,
+             must=()) -> tuple[list[dict], list[str]]:
     """Group connection ids by their fitted text.
 
     Returns ([{"text", "platforms"}], [reasons for the connections left out])."""
@@ -137,7 +171,8 @@ def versions(text: str, platforms: list[str], *, finish_for: Callable[[str], Cal
     skipped = []
     for conn in platforms:
         net = platform_of(conn)
-        out, why = fit(text, net, finish=finish_for(net), has_media=has_media, table=table)
+        out, why = fit(text, net, finish=finish_for(net), has_media=has_media, table=table,
+                       short=short, cta=cta, must=must)
         if out is None:
             skipped.append(f"{conn}: {why}")
             continue
