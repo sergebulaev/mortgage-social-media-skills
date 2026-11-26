@@ -33,7 +33,9 @@ This bundle writes your own organic posts: the weekly rate post, education posts
 <!-- seo:end -->
 
 <!-- family:start (maintained upstream, regenerated from the bundle data) -->
-> **Same author.** Skills for one network instead of one profession: [LinkedIn](https://github.com/sergebulaev/linkedin-skills) · [X](https://github.com/sergebulaev/x-skills) · [Instagram](https://github.com/sergebulaev/instagram-skills) · [YouTube](https://github.com/sergebulaev/youtube-skills) · [TikTok](https://github.com/sergebulaev/tiktok-skills) · [Threads](https://github.com/sergebulaev/threads-skills) · [Facebook](https://github.com/sergebulaev/facebook-skills).
+> **One of a family.** [Social Media Skills for Professionals](https://github.com/sergebulaev/social-media-skills-for-professionals) has one bundle per profession.
+>
+> Skills for one network instead of one profession: [LinkedIn](https://github.com/sergebulaev/linkedin-skills) · [X](https://github.com/sergebulaev/x-skills) · [Instagram](https://github.com/sergebulaev/instagram-skills) · [YouTube](https://github.com/sergebulaev/youtube-skills) · [TikTok](https://github.com/sergebulaev/tiktok-skills) · [Threads](https://github.com/sergebulaev/threads-skills) · [Facebook](https://github.com/sergebulaev/facebook-skills).
 <!-- family:end -->
 
 ## What you can do
