@@ -122,10 +122,10 @@ npx skills add sergebulaev/mortgage-social-media-skills
 
 | Where | Status | Notes |
 |---|---|---|
-| Claude Code | verified | `claude plugin validate` passes; the behaviour evals run here (Claude Code 2.1, a fake Publora, 6 cases × 2 runs, 12 of 12 passed on 2026-11-24) |
-| Any agent through `npx skills add` (Codex, Cursor, OpenClaw and others) | install verified | installs as one skill that routes to the three; behaviour tested only in Claude Code |
+| Claude Code | verified | `claude plugin validate` passes; the behaviour evals run here (Claude Code 2.1, a fake Publora, 6 cases × 2 runs, 12 of 12 passed on 2026-11-24); `claude plugin marketplace add` + `install` from this public repo checked on 2026-11-26 |
+| Any agent through `npx skills add` (Codex, Cursor, OpenClaw and others) | install verified | installs as one skill that routes to the three (checked on the public repo 2026-11-26); behaviour tested only in Claude Code |
 | Claude Desktop and claude.ai | limited | the same plugin, not yet tested end to end. Reading the Freddie Mac rate survey needs network access from the session; if it is blocked, paste the numbers and the skill works from them |
-| Codex CLI as a plugin | limited | the `.codex-plugin` manifest is there; not yet tested end to end |
+| Codex CLI as a plugin | install verified | `codex plugin marketplace add` + `codex plugin add` install the three skills (Codex CLI 0.148, 2026-11-26); behaviour tested only in Claude Code |
 | Autopilot on GitHub Actions | limited | tested offline with saved feed data and a dry run; your copy's first run is the live test (run it once with `dry_run: true`) |
 
 ## What it needs
